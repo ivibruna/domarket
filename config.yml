@@ -8,21 +8,24 @@ general:
   - {symbol: "GC=F",      name: "Oro"}
   - {symbol: "BTC-EUR",   name: "Bitcoin (EUR)"}
   - {symbol: "EURUSD=X",  name: "EUR/USD"}
-
+ 
 watchlist:
   - symbol: "NXT.MC"          # cotización principal en Madrid (EUR)
     name: "Nueva Expresión Textil"
     isin: "ES0126962069"      # identificador de referencia
-
+ 
 # Titulares: feeds RSS/Atom. Cada feed puede llevar:
 #   priority: true       -> suma puntos (fuentes oficiales, siempre relevantes)
 #   only_keywords: true  -> solo entran titulares con alguna palabra clave
+# Valida los feeds con:  python -m src.news
 news:
   days: 7            # ventana de días hacia atrás
   max_per_feed: 6
   max_total: 12
   feeds:
-    - {name: "WSJ Markets",             url: "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"}
+    - {name: "CNBC Finance",            url: "https://www.cnbc.com/id/10000664/device/rss/rss.html"}
+    - {name: "CNBC Top News",           url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", only_keywords: true}
+    - {name: "MarketWatch",             url: "https://feeds.content.dowjones.io/public/rss/mw_topstories"}
     - {name: "BBC Business",            url: "https://feeds.bbci.co.uk/news/business/rss.xml"}
     - {name: "BBC World",               url: "https://feeds.bbci.co.uk/news/world/rss.xml", only_keywords: true}
     - {name: "BCE",                     url: "https://www.ecb.europa.eu/rss/press.xml", priority: true}
@@ -32,20 +35,25 @@ news:
     - crude
     - brent
     - opec
+    - opec+
+    - hormuz
+    - strait
+    - iran
+    - ceasefire
+    - war
+    - sanctions
+    - tariff
+    - tariffs
     - inflation
     - interest rate
     - interest rates
     - rate
     - rates
+    - rate hike
     - fed
     - federal reserve
     - ecb
     - central bank
-    - tariff
-    - tariffs
-    - war
-    - ceasefire
-    - sanctions
     - stocks
     - shares
     - wall street
