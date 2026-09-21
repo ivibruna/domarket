@@ -114,7 +114,19 @@ def _section(title: str, body: str) -> str:
     )
 
 
-def render_html(data: dict, now: datetime, demo: bool = False) -> str:
+def _headlines_html(headlines) -> str:
+    items = []
+    for h in headlines:
+        link = escape(h.link, quote=True) if h.link.startswith(("http://", "https://")) else "#"
+        items.append(
+            f'<li style="margin:0 0 8px;font-size:13px;line-height:1.4;">'
+            f'<a href="{link}" style="color:#0969da;text-decoration:none;">{escape(h.title)}</a><br>'
+            f'<span style="font-size:11px;color:{GREY};">{escape(h.source)} · {h.published.strftime("%d/%m")}</span></li>'
+        )
+    return f'<ul style="margin:0;padding-left:18px;">{"".join(items)}</ul>'
+
+
+def render_html(data: dict, now: datetime, demo: bool = False, headlines=None) -> str:
     banner = ""
     if demo:
         banner = (
@@ -126,6 +138,7 @@ def render_html(data: dict, now: datetime, demo: bool = False) -> str:
         "Mercado general",
         _table(["Activo", "Último", "1 sem.", "1 mes"], _general_rows(data.get("general", []))),
     )
+    news = _section("Titulares de la semana", _headlines_html(headlines)) if headlines else ""
     watch = ""
     if data.get("watchlist"):
         watch = _section(
@@ -147,6 +160,7 @@ def render_html(data: dict, now: datetime, demo: bool = False) -> str:
 <h1 style="font-size:20px;margin:0;">Resumen semanal de mercado</h1>
 <p style="margin:4px 0 0;font-size:13px;color:{GREY};">{escape(fmt_date_long(now))}</p>
 {general}
+{news}
 {watch}
 <p style="margin:28px 0 0;padding-top:12px;border-top:1px solid #eaeef2;font-size:11px;color:{GREY};">{escape(DISCLAIMER)}</p>
 </td></tr></table>
@@ -156,7 +170,7 @@ def render_html(data: dict, now: datetime, demo: bool = False) -> str:
 
 
 # ---------- versión de texto ----------
-def render_text(data: dict, now: datetime, demo: bool = False) -> str:
+def render_text(data: dict, now: datetime, demo: bool = False, headlines=None) -> str:
     lines = []
     if demo:
         lines.append("*** DATOS DE EJEMPLO: cifras inventadas, no reales ***\n")
@@ -172,5 +186,8 @@ def render_text(data: dict, now: datetime, demo: bool = False) -> str:
                 lines.append(
                     f"- {q.name}: {fmt_num(m.last)} (1 sem. {fmt_pct(m.change_1w)}, 1 mes {fmt_pct(m.change_1m)})"
                 )
+    if headlines:
+        lines += ["", "TITULARES DE LA SEMANA"]
+        lines += [f"- {h.title} ({h.source}, {h.published.strftime('%d/%m')}) {h.link}" for h in headlines]
     lines += ["", DISCLAIMER]
     return "\n".join(lines)

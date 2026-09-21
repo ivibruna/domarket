@@ -27,3 +27,16 @@ def demo_data() -> dict:
             Quote("NXT.MC", "Nueva Expresión Textil", _m(1.0, -3.5, 2.1, 1.2, 0.7)),
         ],
     }
+
+
+def demo_headlines() -> list:
+    from datetime import datetime, timedelta, timezone
+
+    from .news import Headline
+
+    now = datetime.now(timezone.utc)
+    return [
+        Headline("Fuente A", "Titular de ejemplo sobre el petróleo", "https://example.com/1", now - timedelta(days=1)),
+        Headline("Fuente B", "Titular de ejemplo sobre tipos de interés", "https://example.com/2", now - timedelta(days=2)),
+        Headline("Fuente C", "Titular de ejemplo sobre bolsas y conflictos", "https://example.com/3", now - timedelta(days=3)),
+    ]

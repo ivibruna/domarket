@@ -7,12 +7,13 @@ Uso:
     python -m src.main --send            # envía el correo real
 """
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from .data import fetch_all, load_config
-from .demo import demo_data
+from .demo import demo_data, demo_headlines
 from .env import load_dotenv
+from .news import collect_headlines
 from .render import render_html, render_text
 from .send import build_message, mail_settings_from_env, send_email
 
@@ -31,13 +32,18 @@ def main() -> None:
     args = ap.parse_args()
 
     load_dotenv()
-    data = demo_data() if args.demo else fetch_all(load_config(args.config))
+    if args.demo:
+        data, headlines = demo_data(), demo_headlines()
+    else:
+        cfg = load_config(args.config)
+        data = fetch_all(cfg)
+        headlines = collect_headlines(cfg.get("news", {}), datetime.now(timezone.utc))
     if not args.demo and _all_failed(data):
         raise SystemExit("No se pudo obtener ningún dato: no se genera ni se envía el correo.")
 
     now = datetime.now()
-    html = render_html(data, now, demo=args.demo)
-    text = render_text(data, now, demo=args.demo)
+    html = render_html(data, now, demo=args.demo, headlines=headlines)
+    text = render_text(data, now, demo=args.demo, headlines=headlines)
     Path(args.out).write_text(html, encoding="utf-8")
     print(f"Vista previa guardada en {args.out}")
 

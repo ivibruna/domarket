@@ -42,5 +42,23 @@ class RenderTest(unittest.TestCase):
         self.assertIn("MI SEGUIMIENTO", text)
 
 
+
+class HeadlinesRenderTest(unittest.TestCase):
+    def test_headlines_section_escapes_and_links(self):
+        from datetime import timezone
+
+        from src.news import Headline
+        hs = [Headline("Fuente <X>", "Petróleo <sube> & baja", "https://ejemplo.com/a?x=1&y=2",
+                       datetime(2026, 9, 26, tzinfo=timezone.utc))]
+        html = render_html(demo_data(), NOW, headlines=hs)
+        self.assertIn("Titulares de la semana", html)
+        self.assertIn("Petróleo &lt;sube&gt; &amp; baja", html)
+        self.assertIn('href="https://ejemplo.com/a?x=1&amp;y=2"', html)
+        self.assertIn("TITULARES DE LA SEMANA", render_text(demo_data(), NOW, headlines=hs))
+
+    def test_no_headlines_no_section(self):
+        self.assertNotIn("Titulares de la semana", render_html(demo_data(), NOW))
+
+
 if __name__ == "__main__":
     unittest.main()
