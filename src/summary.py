@@ -14,7 +14,7 @@ from typing import Callable, List, Optional
 
 from .render import fmt_date_long, fmt_num, fmt_pct
 
-DEFAULT_MODEL = "hf.co/ggml-org/gemma-4-E4B-it-GGUF:Q4_K_M"
+DEFAULT_MODEL = "hf.co/unsloth/gemma-4-E4B-it-GGUF:Q4_K_M"
 
 SYSTEM_PROMPT = """Eres un analista financiero que escribe un resumen semanal breve para un inversor particular en España.
 

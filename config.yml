@@ -8,12 +8,12 @@ general:
   - {symbol: "GC=F",      name: "Oro"}
   - {symbol: "BTC-EUR",   name: "Bitcoin (EUR)"}
   - {symbol: "EURUSD=X",  name: "EUR/USD"}
-
+ 
 watchlist:
   - symbol: "NXT.MC"          # cotización principal en Madrid (EUR)
     name: "Nueva Expresión Textil"
     isin: "ES0126962069"      # identificador de referencia
-
+ 
 # Titulares: feeds RSS/Atom. Cada feed puede llevar:
 #   priority: true       -> suma puntos (fuentes oficiales, siempre relevantes)
 #   only_keywords: true  -> solo entran titulares con alguna palabra clave
@@ -73,12 +73,12 @@ news:
     - tipos
     - guerra
     - bolsa
-
+ 
 # Resumen redactado por un modelo de lenguaje (Gemma 4 ejecutado con Ollama).
 # El modelo se puede cambiar aquí o con la variable SUMMARY_MODEL.
 summary:
   backend: ollama
-  model: "hf.co/ggml-org/gemma-4-E4B-it-GGUF:Q4_K_M"
+  model: "hf.co/unsloth/gemma-4-E4B-it-GGUF:Q4_K_M"
   num_ctx: 6144
   temperature: 0.3
   max_tokens: 700

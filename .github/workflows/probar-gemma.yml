@@ -1,5 +1,5 @@
 name: probar-gemma
-
+ 
 # Prueba MANUAL: instala Ollama en el ejecutor, descarga Gemma y genera el resumen con datos reales.
 # No envía correo ni usa secretos. Sirve para medir tiempos y memoria.
 on:
@@ -7,11 +7,11 @@ on:
     inputs:
       model:
         description: "Modelo de Ollama a probar"
-        default: "hf.co/ggml-org/gemma-4-E4B-it-GGUF:Q4_K_M"
-
+        default: "hf.co/unsloth/gemma-4-E4B-it-GGUF:Q4_K_M"
+ 
 permissions:
   contents: read
-
+ 
 jobs:
   probar:
     runs-on: ubuntu-latest
@@ -22,26 +22,26 @@ jobs:
       OLLAMA_MAX_LOADED_MODELS: "1"
     steps:
       - uses: actions/checkout@v4
-
+ 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-
+ 
       - name: Instalar dependencias
         run: pip install -r requirements.txt
-
+ 
       - name: Recursos del ejecutor
         run: |
           echo "CPUs: $(nproc)"
           free -h
           df -h /
-
+ 
       - name: Instalar Ollama
         run: |
           curl -fsSL https://ollama.com/install.sh | sh
           ollama --version
-
+ 
       - name: Arrancar Ollama
         run: |
           if ! curl -sf http://127.0.0.1:11434 > /dev/null; then
@@ -52,18 +52,19 @@ jobs:
             sleep 2
           done
           curl -sf http://127.0.0.1:11434
-
+ 
       - name: Descargar el modelo
         run: |
           ollama pull "$SUMMARY_MODEL"
           df -h /
-
+ 
       - name: Generar el resumen de prueba
         run: python -m src.summary
-
+ 
       - name: Estado final (memoria y registro de Ollama)
         if: always()
         run: |
           free -h
           ollama ps || true
-          tail -n 40 ollama.log || true
+          tail -n 40 ollama.log 2>/dev/null || sudo journalctl -u ollama --no-pager -n 40 || true
+ 
