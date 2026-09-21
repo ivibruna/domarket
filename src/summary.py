@@ -1,4 +1,4 @@
-"""Resumen tipo analista redactado por un modelo de lenguaje (por defecto, Gemma 4 vía Ollama).
+"""Resumen tipo analista redactado por un modelo de lenguaje (por defecto, Gemma 4 con llama.cpp).
 
 El modelo solo recibe datos ya calculados y titulares: no puede consultar nada por su cuenta.
 Probar sin enviar correo:   python -m src.summary
@@ -14,7 +14,7 @@ from typing import Callable, List, Optional
 
 from .render import fmt_date_long, fmt_num, fmt_pct
 
-DEFAULT_MODEL = "hf.co/unsloth/gemma-4-E4B-it-GGUF:Q4_K_M"
+DEFAULT_MODEL = "gemma-4-E4B-it-Q4_K_M"
 
 SYSTEM_PROMPT = """Eres un analista financiero que escribe un resumen semanal breve para un inversor particular en España.
 
@@ -78,12 +78,36 @@ def ollama_generate(system: str, prompt: str, model: str, host: str = "http://12
     return payload["message"]["content"]
 
 
+def llamacpp_generate(system: str, prompt: str, model: str = "", host: Optional[str] = None,
+                      temperature: float = 0.3, max_tokens: int = 700, timeout: int = 1500,
+                      **_ignored) -> str:
+    """Llama al servidor local de llama.cpp (llama-server), que expone una API tipo OpenAI."""
+    host = host or os.environ.get("LLAMA_SERVER_URL", "http://127.0.0.1:8080")
+    body = json.dumps({
+        "model": model or "local",
+        "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "stream": False,
+        "chat_template_kwargs": {"enable_thinking": False},
+    }).encode("utf-8")
+    req = urllib.request.Request(f"{host}/v1/chat/completions", data=body,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        payload = json.loads(resp.read())
+    return payload["choices"][0]["message"]["content"]
+
+
+BACKENDS = {"ollama": ollama_generate, "llamacpp": llamacpp_generate}
+
+
 def generate_summary(data: dict, headlines: list, now: datetime, summary_cfg: Optional[dict] = None,
-                     generator: Callable = ollama_generate) -> Optional[str]:
+                     generator: Optional[Callable] = None) -> Optional[str]:
     """Devuelve el resumen o None si algo falla (el correo sale igual, sin este bloque)."""
     cfg = summary_cfg or {}
     model = os.environ.get("SUMMARY_MODEL") or cfg.get("model", DEFAULT_MODEL)
     try:
+        generator = generator or BACKENDS[cfg.get("backend", "llamacpp")]
         raw = generator(
             SYSTEM_PROMPT, build_prompt(data, headlines, now), model=model,
             num_ctx=cfg.get("num_ctx", 6144), temperature=cfg.get("temperature", 0.3),

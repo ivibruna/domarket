@@ -1,70 +1,74 @@
 name: probar-gemma
- 
-# Prueba MANUAL: instala Ollama en el ejecutor, descarga Gemma y genera el resumen con datos reales.
+
+# Prueba MANUAL: descarga Gemma 4 (GGUF) y llama.cpp, y genera el resumen con datos reales.
 # No envía correo ni usa secretos. Sirve para medir tiempos y memoria.
 on:
   workflow_dispatch:
     inputs:
-      model:
-        description: "Modelo de Ollama a probar"
-        default: "hf.co/unsloth/gemma-4-E4B-it-GGUF:Q4_K_M"
- 
+      model_url:
+        description: "URL del archivo GGUF"
+        default: "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf"
+
 permissions:
   contents: read
- 
+
 jobs:
   probar:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
-      SUMMARY_MODEL: ${{ inputs.model }}
-      OLLAMA_NUM_PARALLEL: "1"
-      OLLAMA_MAX_LOADED_MODELS: "1"
+      GH_TOKEN: ${{ github.token }}
+      MODEL_URL: ${{ inputs.model_url }}
     steps:
       - uses: actions/checkout@v4
- 
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
- 
+
       - name: Instalar dependencias
         run: pip install -r requirements.txt
- 
+
       - name: Recursos del ejecutor
         run: |
           echo "CPUs: $(nproc)"
           free -h
           df -h /
- 
-      - name: Instalar Ollama
+
+      - name: Instalar llama.cpp (binarios oficiales)
         run: |
-          curl -fsSL https://ollama.com/install.sh | sh
-          ollama --version
- 
-      - name: Arrancar Ollama
-        run: |
-          if ! curl -sf http://127.0.0.1:11434 > /dev/null; then
-            nohup ollama serve > ollama.log 2>&1 &
-          fi
-          for i in $(seq 1 30); do
-            curl -sf http://127.0.0.1:11434 > /dev/null && break
-            sleep 2
-          done
-          curl -sf http://127.0.0.1:11434
- 
+          gh release view --repo ggml-org/llama.cpp --json tagName,assets -q '.tagName, (.assets[].name)' | grep -E "^b[0-9]+$|ubuntu" || true
+          mkdir -p llama && cd llama
+          gh release download --repo ggml-org/llama.cpp --pattern 'llama-*-bin-ubuntu-x64.*'
+          if ls *.zip > /dev/null 2>&1; then unzip -q *.zip; else tar xzf *.tar.gz; fi
+          SERVER=$(find "$PWD" -name llama-server -type f | head -1)
+          test -n "$SERVER"
+          echo "LLAMA_SERVER=$SERVER" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$(dirname "$SERVER")" >> "$GITHUB_ENV"
+          "$SERVER" --version || true
+
       - name: Descargar el modelo
         run: |
-          ollama pull "$SUMMARY_MODEL"
+          curl -L --fail --retry 5 --retry-delay 10 -o model.gguf "$MODEL_URL"
+          ls -lh model.gguf
           df -h /
- 
+
+      - name: Arrancar llama-server
+        run: |
+          nohup "$LLAMA_SERVER" -m model.gguf --jinja -c 6144 -t "$(nproc)" \
+            --host 127.0.0.1 --port 8080 > llama.log 2>&1 &
+          for i in $(seq 1 90); do
+            curl -sf http://127.0.0.1:8080/health > /dev/null && break
+            sleep 2
+          done
+          curl -sf http://127.0.0.1:8080/health
+
       - name: Generar el resumen de prueba
         run: python -m src.summary
- 
-      - name: Estado final (memoria y registro de Ollama)
+
+      - name: Estado final (memoria y registro del servidor)
         if: always()
         run: |
           free -h
-          ollama ps || true
-          tail -n 40 ollama.log 2>/dev/null || sudo journalctl -u ollama --no-pager -n 40 || true
- 
+          tail -n 40 llama.log || true

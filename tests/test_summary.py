@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from unittest import mock
 
 from src.demo import demo_data, demo_headlines
-from src.summary import SYSTEM_PROMPT, build_prompt, clean_summary, generate_summary, ollama_generate
+from src.summary import (SYSTEM_PROMPT, build_prompt, clean_summary, generate_summary,
+                         llamacpp_generate, ollama_generate)
 
 NOW = datetime(2026, 9, 28, 8, 0)
 GOOD = ("Cómo llegamos: " + "el petróleo cayó esta semana según CNBC. " * 6 + "\n\n"
@@ -82,6 +83,29 @@ class OllamaTest(unittest.TestCase):
         self.assertFalse(body["stream"])
         self.assertEqual(body["options"]["num_ctx"], 1024)
         self.assertEqual(body["messages"][0]["role"], "system")
+
+
+class LlamaCppTest(unittest.TestCase):
+    def test_request_shape_and_response_parsing(self):
+        resp = mock.MagicMock()
+        resp.read.return_value = json.dumps({"choices": [{"message": {"content": "hola"}}]}).encode()
+        with mock.patch("src.summary.urllib.request.urlopen") as urlopen:
+            urlopen.return_value.__enter__.return_value = resp
+            out = llamacpp_generate("sys", "user", model="m", temperature=0.2, max_tokens=99, num_ctx=1)
+        self.assertEqual(out, "hola")
+        req = urlopen.call_args[0][0]
+        self.assertTrue(req.full_url.endswith("/v1/chat/completions"))
+        body = json.loads(req.data)
+        self.assertEqual(body["max_tokens"], 99)
+        self.assertFalse(body["stream"])
+        self.assertEqual(body["messages"][1]["content"], "user")
+
+    def test_default_backend_is_llamacpp(self):
+        fake = mock.MagicMock(return_value=GOOD)
+        with mock.patch.dict("src.summary.BACKENDS", {"llamacpp": fake}):
+            text = generate_summary(demo_data(), [], NOW, {})
+        self.assertIn("Cómo llegamos:", text)
+        fake.assert_called_once()
 
 
 if __name__ == "__main__":

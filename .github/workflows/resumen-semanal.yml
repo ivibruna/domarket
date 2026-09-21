@@ -1,4 +1,4 @@
-name: domarket
+name: resumen-semanal
 
 on:
   schedule:
@@ -9,28 +9,28 @@ on:
         description: "Enviar correo de EJEMPLO con datos ficticios"
         type: boolean
         default: false
- 
+
 permissions:
   contents: read
- 
+
 jobs:
   enviar:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
- 
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
- 
+
       - name: Instalar dependencias
         run: pip install -r requirements.txt
- 
+
       - name: Comprobar feeds de titulares
         run: python -m src.news
- 
+
       - name: Generar y enviar el resumen
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
@@ -43,4 +43,3 @@ jobs:
           else
             python -m src.main --send
           fi
- 
