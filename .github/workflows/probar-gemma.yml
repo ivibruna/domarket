@@ -38,10 +38,9 @@ jobs:
 
       - name: Instalar llama.cpp (binarios oficiales)
         run: |
-          gh release view --repo ggml-org/llama.cpp --json tagName,assets -q '.tagName, (.assets[].name)' | grep -E "^b[0-9]+$|ubuntu" || true
           mkdir -p llama && cd llama
-          gh release download --repo ggml-org/llama.cpp --pattern 'llama-*-bin-ubuntu-x64.*'
-          if ls *.zip > /dev/null 2>&1; then unzip -q *.zip; else tar xzf *.tar.gz; fi
+          gh release download --repo ggml-org/llama.cpp --pattern "*ubuntu-x64.tar.gz"
+          tar xzf *.tar.gz
           SERVER=$(find "$PWD" -name llama-server -type f | head -1)
           test -n "$SERVER"
           echo "LLAMA_SERVER=$SERVER" >> "$GITHUB_ENV"
