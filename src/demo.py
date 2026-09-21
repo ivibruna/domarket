@@ -40,3 +40,15 @@ def demo_headlines() -> list:
         Headline("Fuente B", "Titular de ejemplo sobre tipos de interés", "https://example.com/2", now - timedelta(days=2)),
         Headline("Fuente C", "Titular de ejemplo sobre bolsas y conflictos", "https://example.com/3", now - timedelta(days=3)),
     ]
+
+
+def demo_summary() -> str:
+    return (
+        "Cómo llegamos: texto de ejemplo. Aquí aparecerá el resumen redactado por el modelo sobre cómo "
+        "cerró la semana pasada en los mercados, con los movimientos más relevantes del petróleo, la renta "
+        "variable, el oro y el bitcoin, atribuidos a sus fuentes.\n\n"
+        "Qué vigilar esta semana: texto de ejemplo. Los eventos y datos que aparezcan en los titulares "
+        "recientes, como decisiones de bancos centrales o novedades geopolíticas, se resumirán en este párrafo.\n\n"
+        "Riesgos: texto de ejemplo. Aquí se resumirán los principales riesgos que señalan las fuentes en ese momento, "
+        "sin recomendaciones de compra o venta."
+    )

@@ -5,16 +5,18 @@ Uso:
     python -m src.main                   # vista previa con datos reales
     python -m src.main --demo --send     # envía un correo de PRUEBA con datos ficticios
     python -m src.main --send            # envía el correo real
+    Añade --ai para incluir el análisis redactado por el modelo de IA (necesita Ollama en marcha).
 """
 import argparse
 from datetime import datetime, timezone
 from pathlib import Path
 
 from .data import fetch_all, load_config
-from .demo import demo_data, demo_headlines
+from .demo import demo_data, demo_headlines, demo_summary
 from .env import load_dotenv
 from .news import collect_headlines
 from .render import render_html, render_text
+from .summary import generate_summary
 from .send import build_message, mail_settings_from_env, send_email
 
 
@@ -27,11 +29,13 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Resumen semanal de mercado")
     ap.add_argument("--demo", action="store_true", help="usar datos ficticios")
     ap.add_argument("--send", action="store_true", help="enviar por correo (por defecto, solo vista previa)")
+    ap.add_argument("--ai", action="store_true", help="añadir el análisis redactado por el modelo de IA")
     ap.add_argument("--config", default="config.yml")
     ap.add_argument("--out", default="preview.html")
     args = ap.parse_args()
 
     load_dotenv()
+    cfg = {}
     if args.demo:
         data, headlines = demo_data(), demo_headlines()
     else:
@@ -42,8 +46,11 @@ def main() -> None:
         raise SystemExit("No se pudo obtener ningún dato: no se genera ni se envía el correo.")
 
     now = datetime.now()
-    html = render_html(data, now, demo=args.demo, headlines=headlines)
-    text = render_text(data, now, demo=args.demo, headlines=headlines)
+    analysis = None
+    if args.ai:
+        analysis = demo_summary() if args.demo else generate_summary(data, headlines, now, cfg.get("summary"))
+    html = render_html(data, now, demo=args.demo, headlines=headlines, analysis=analysis)
+    text = render_text(data, now, demo=args.demo, headlines=headlines, analysis=analysis)
     Path(args.out).write_text(html, encoding="utf-8")
     print(f"Vista previa guardada en {args.out}")
 

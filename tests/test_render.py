@@ -60,5 +60,20 @@ class HeadlinesRenderTest(unittest.TestCase):
         self.assertNotIn("Titulares de la semana", render_html(demo_data(), NOW))
 
 
+class AnalysisRenderTest(unittest.TestCase):
+    TEXT = "Cómo llegamos: el petróleo <cayó> & el oro subió.\n\nRiesgos: la guerra sigue."
+
+    def test_analysis_section_bold_labels_escaped_and_ai_note(self):
+        html = render_html(demo_data(), NOW, analysis=self.TEXT)
+        self.assertIn("Análisis de la semana", html)
+        self.assertIn("<strong>Cómo llegamos:</strong>", html)
+        self.assertIn("&lt;cayó&gt; &amp; el oro", html)
+        self.assertIn("modelo de IA", html)
+        self.assertIn("ANÁLISIS DE LA SEMANA", render_text(demo_data(), NOW, analysis=self.TEXT))
+
+    def test_no_analysis_no_section(self):
+        self.assertNotIn("Análisis de la semana", render_html(demo_data(), NOW))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -126,7 +126,24 @@ def _headlines_html(headlines) -> str:
     return f'<ul style="margin:0;padding-left:18px;">{"".join(items)}</ul>'
 
 
-def render_html(data: dict, now: datetime, demo: bool = False, headlines=None) -> str:
+AI_NOTE = ("Texto generado automáticamente por un modelo de IA a partir de los datos y titulares de este "
+           "correo; puede contener errores.")
+
+
+def _analysis_html(text: str) -> str:
+    paragraphs = []
+    for para in [p.strip() for p in text.split("\n\n") if p.strip()]:
+        label, sep, rest = para.partition(":")
+        if sep and len(label) <= 40:
+            para_html = f"<strong>{escape(label)}:</strong>{escape(rest)}"
+        else:
+            para_html = escape(para)
+        paragraphs.append(f'<p style="margin:0 0 10px;font-size:14px;line-height:1.5;">{para_html}</p>')
+    note = f'<p style="margin:0;font-size:11px;color:{GREY};font-style:italic;">{escape(AI_NOTE)}</p>'
+    return "".join(paragraphs) + note
+
+
+def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, analysis=None) -> str:
     banner = ""
     if demo:
         banner = (
@@ -138,6 +155,7 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None) -
         "Mercado general",
         _table(["Activo", "Último", "1 sem.", "1 mes"], _general_rows(data.get("general", []))),
     )
+    analysis_html = _section("Análisis de la semana", _analysis_html(analysis)) if analysis else ""
     news = _section("Titulares de la semana", _headlines_html(headlines)) if headlines else ""
     watch = ""
     if data.get("watchlist"):
@@ -159,6 +177,7 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None) -
 {banner}
 <h1 style="font-size:20px;margin:0;">Resumen semanal de mercado</h1>
 <p style="margin:4px 0 0;font-size:13px;color:{GREY};">{escape(fmt_date_long(now))}</p>
+{analysis_html}
 {general}
 {news}
 {watch}
@@ -170,11 +189,14 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None) -
 
 
 # ---------- versión de texto ----------
-def render_text(data: dict, now: datetime, demo: bool = False, headlines=None) -> str:
+def render_text(data: dict, now: datetime, demo: bool = False, headlines=None, analysis=None) -> str:
     lines = []
     if demo:
         lines.append("*** DATOS DE EJEMPLO: cifras inventadas, no reales ***\n")
-    lines += ["RESUMEN SEMANAL DE MERCADO", fmt_date_long(now), "", "MERCADO GENERAL"]
+    lines += ["RESUMEN SEMANAL DE MERCADO", fmt_date_long(now)]
+    if analysis:
+        lines += ["", "ANÁLISIS DE LA SEMANA", analysis, f"({AI_NOTE})"]
+    lines += ["", "MERCADO GENERAL"]
     for section, title in (("general", None), ("watchlist", "MI SEGUIMIENTO")):
         if title:
             lines += ["", title]
