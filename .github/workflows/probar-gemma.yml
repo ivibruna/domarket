@@ -39,7 +39,7 @@ jobs:
       - name: Instalar llama.cpp (binarios oficiales)
         run: |
           mkdir -p llama && cd llama
-          gh release download --repo ggml-org/llama.cpp --pattern "*ubuntu-x64.tar.gz"
+          gh release download b11081 --repo ggml-org/llama.cpp --pattern '*ubuntu-x64.tar.gz'
           tar xzf *.tar.gz
           SERVER=$(find "$PWD" -name llama-server -type f | head -1)
           test -n "$SERVER"
