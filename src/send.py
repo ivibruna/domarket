@@ -3,6 +3,7 @@ import os
 import smtplib
 import ssl
 from email.message import EmailMessage
+from email.utils import formataddr
 from email.utils import formatdate, make_msgid
 
 
@@ -18,13 +19,15 @@ def mail_settings_from_env() -> dict:
         "to": [a.strip() for a in os.environ["MAIL_TO"].split(",") if a.strip()],
         "host": os.environ.get("SMTP_HOST", "smtp.gmail.com"),
         "port": int(os.environ.get("SMTP_PORT", "465")),
+        "sender_name": os.environ.get("SENDER_NAME", "Resumen de Mercado").strip(),
     }
 
 
-def build_message(subject: str, html: str, text: str, sender: str, to: list) -> EmailMessage:
+def build_message(subject: str, html: str, text: str, sender: str, to: list,
+                  sender_name: str = "") -> EmailMessage:
     msg = EmailMessage()
     msg["Subject"] = subject
-    msg["From"] = sender
+    msg["From"] = formataddr((sender_name, sender)) if sender_name else sender
     msg["To"] = ", ".join(to)
     msg["Date"] = formatdate(localtime=True)
     msg["Message-ID"] = make_msgid()

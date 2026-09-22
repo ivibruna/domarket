@@ -58,7 +58,7 @@ def main() -> None:
         cfg = mail_settings_from_env()
         prefix = "[EJEMPLO] " if args.demo else ""
         subject = f"{prefix}Resumen semanal de mercado · {now.strftime('%d/%m/%Y')}"
-        msg = build_message(subject, html, text, cfg["user"], cfg["to"])
+        msg = build_message(subject, html, text, cfg["user"], cfg["to"], sender_name=cfg["sender_name"])
         send_email(msg, cfg["user"], cfg["password"], cfg["host"], cfg["port"])
         print(f"Correo enviado a {len(cfg['to'])} destinatario(s).")
 
