@@ -10,15 +10,15 @@ general:
   - {symbol: "EURUSD=X",  name: "EUR/USD"}
 
 watchlist:
-  - symbol: "NXTE"          # cotización principal en Madrid (EUR)
+  - symbol: "NXT.MC"         # cotización principal en Madrid (EUR)
     name: "Nueva Expresión Textil"
     isin: "ES0126962069"      # identificador de referencia
-  - symbol: "APE"          # cotización principal en Madrid (EUR)
+  - symbol: "AMP.MC"          # cotización principal en Madrid (EUR)
     name: "Amper"
-    isin: "ES0109260291" 
-  - symbol: "OHLA"          # cotización principal en Madrid (EUR)
-    name: "Obrascon Huarte Lain"
-    isin: "ES0142090317" 
+    isin: "ES0109260291"
+  - symbol: "OHLA.MC"         # cotización principal en Madrid (EUR)
+    name: "Obrascón Huarte Lain"
+    isin: "ES0142090317"
 
 # Titulares: feeds RSS/Atom. Cada feed puede llevar:
 #   priority: true       -> suma puntos (fuentes oficiales, siempre relevantes)
