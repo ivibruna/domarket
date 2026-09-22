@@ -13,10 +13,14 @@ on:
 permissions:
   contents: read
 
+env:
+  LLAMACPP_TAG: "b11081"  # si esta versión deja de estar disponible, cambia el número por una reciente
+  MODEL_URL: "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf"
+
 jobs:
   enviar:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -31,6 +35,31 @@ jobs:
       - name: Comprobar feeds de titulares
         run: python -m src.news
 
+      - name: Instalar llama.cpp
+        run: |
+          mkdir -p llama && cd llama
+          gh release download "$LLAMACPP_TAG" --repo ggml-org/llama.cpp --pattern '*ubuntu-x64.tar.gz'
+          tar xzf *.tar.gz
+          SERVER=$(find "$PWD" -name llama-server -type f | head -1)
+          test -n "$SERVER"
+          echo "LLAMA_SERVER=$SERVER" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$(dirname "$SERVER")" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Descargar el modelo (Gemma 4 E4B)
+        run: curl -L --fail --retry 5 --retry-delay 10 -o model.gguf "$MODEL_URL"
+
+      - name: Arrancar llama-server
+        run: |
+          nohup "$LLAMA_SERVER" -m model.gguf --jinja -c 6144 -t "$(nproc)" \
+            --host 127.0.0.1 --port 8080 > llama.log 2>&1 &
+          for i in $(seq 1 90); do
+            curl -sf http://127.0.0.1:8080/health > /dev/null && break
+            sleep 2
+          done
+          curl -sf http://127.0.0.1:8080/health
+
       - name: Generar y enviar el resumen
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
@@ -39,7 +68,11 @@ jobs:
           DEMO: ${{ inputs.demo }}
         run: |
           if [ "$DEMO" = "true" ]; then
-            python -m src.main --demo --send
+            python -m src.main --demo --ai --send
           else
-            python -m src.main --send
+            python -m src.main --ai --send
           fi
+
+      - name: Registro de llama-server (si algo falla)
+        if: failure()
+        run: tail -n 60 llama.log || true
