@@ -15,12 +15,12 @@ permissions:
 
 env:
   LLAMACPP_TAG: "b11081"  # si esta versión deja de estar disponible, cambia el número por una reciente
-  MODEL_URL: "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf"
+  MODEL_URL: "https://huggingface.co/unsloth/gemma-4-12b-it-GGUF/resolve/main/gemma-4-12b-it-UD-Q4_K_XL.gguf"  # 7,4 GB; solo cabe en un runner de repo público (16 GB de RAM)
 
 jobs:
   enviar:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 

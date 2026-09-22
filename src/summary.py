@@ -14,7 +14,7 @@ from typing import Callable, List, Optional
 
 from .render import fmt_date_long, fmt_num, fmt_pct
 
-DEFAULT_MODEL = "gemma-4-E4B-it-Q4_K_M"
+DEFAULT_MODEL = "gemma-4-12b-it-UD-Q4_K_XL"
 
 SYSTEM_PROMPT = """Eres un analista financiero ejecutivo. Tu objetivo es redactar un resumen semanal de mercados escaneable y directo para un inversor particular en España.
 

@@ -10,9 +10,15 @@ general:
   - {symbol: "EURUSD=X",  name: "EUR/USD"}
 
 watchlist:
-  - symbol: "NXT.MC"          # cotización principal en Madrid (EUR)
+  - symbol: "NXTE"          # cotización principal en Madrid (EUR)
     name: "Nueva Expresión Textil"
     isin: "ES0126962069"      # identificador de referencia
+  - symbol: "APE"          # cotización principal en Madrid (EUR)
+    name: "Amper"
+    isin: "ES0109260291" 
+  - symbol: "OHLA"          # cotización principal en Madrid (EUR)
+    name: "Obrascon Huarte Lain"
+    isin: "ES0142090317" 
 
 # Titulares: feeds RSS/Atom. Cada feed puede llevar:
 #   priority: true       -> suma puntos (fuentes oficiales, siempre relevantes)
@@ -78,7 +84,8 @@ news:
 # backend: llamacpp (por defecto) u ollama. "model" es solo una etiqueta con llama.cpp.
 summary:
   backend: llamacpp
-  model: "gemma-4-E4B-it-Q4_K_M"
+  #model: "gemma-4-E4B-it-Q4_K_M" #Con este modelo funcionaba bien, pero muy limitado
+  model: "gemma-4-12b-it-UD-Q4_K_XL"  # solo una etiqueta; el binario se descarga por MODEL_URL en el workflow
   num_ctx: 6144
-  temperature: 0.3
+  temperature: 0.2
   max_tokens: 900
