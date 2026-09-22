@@ -12,8 +12,7 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
 GREEN, RED, GREY = "#1a7f37", "#cf222e", "#57606a"
 
 DISCLAIMER = (
-    "Información con fines informativos; no constituye asesoramiento financiero ni una "
-    "recomendación de compra o venta. Datos de Yahoo Finance (pueden tener retraso o errores). "
+    "Datos de Yahoo Finance. "
     "Correo generado automáticamente."
 )
 
@@ -156,7 +155,6 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
         _table(["Activo", "Último", "1 sem.", "1 mes"], _general_rows(data.get("general", []))),
     )
     analysis_html = _section("Análisis de la semana", _analysis_html(analysis)) if analysis else ""
-    news = _section("Titulares de la semana", _headlines_html(headlines)) if headlines else ""
     watch = ""
     if data.get("watchlist"):
         watch = _section(
@@ -167,6 +165,8 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
             ),
         )
     return f"""<!DOCTYPE html>
+    news = _section("Titulares de la semana", _headlines_html(headlines)) if headlines else ""
+
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Resumen semanal de mercado</title></head>
