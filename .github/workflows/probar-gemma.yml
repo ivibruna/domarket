@@ -38,9 +38,14 @@ jobs:
 
       - name: Instalar llama.cpp (binarios oficiales)
         run: |
+          # La última versión a veces aún no tiene archivos adjuntos: se usa la más reciente que sí los tenga
+          TAG=$(gh api "repos/ggml-org/llama.cpp/releases?per_page=30" --jq '[.[] | select(any(.assets[]; .name | test("^llama-.*-bin-ubuntu-x64\\.(tar\\.gz|zip)$")))][0].tag_name')
+          echo "Versión de llama.cpp elegida: $TAG"
+          test -n "$TAG"
           mkdir -p llama && cd llama
-          gh release download b11081 --repo ggml-org/llama.cpp --pattern '*ubuntu-x64.tar.gz'
-          tar xzf *.tar.gz
+          gh release download "$TAG" --repo ggml-org/llama.cpp --pattern 'llama-*-bin-ubuntu-x64.*'
+          ls -la
+          if ls *.zip > /dev/null 2>&1; then unzip -q *.zip; else tar xzf *.tar.gz; fi
           SERVER=$(find "$PWD" -name llama-server -type f | head -1)
           test -n "$SERVER"
           echo "LLAMA_SERVER=$SERVER" >> "$GITHUB_ENV"
