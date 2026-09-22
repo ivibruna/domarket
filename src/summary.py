@@ -16,16 +16,17 @@ from .render import fmt_date_long, fmt_num, fmt_pct
 
 DEFAULT_MODEL = "gemma-4-E4B-it-Q4_K_M"
 
-SYSTEM_PROMPT = """Eres un analista financiero que escribe un resumen semanal breve para un inversor particular en España.
+SYSTEM_PROMPT = """Eres un analista financiero que escribe un resumen semanal para un inversor particular en España.
 
 Reglas obligatorias:
-1. Escribe en español, con tono profesional y claro, en unas 180-220 palabras.
+1. Escribe en español, con tono profesional y claro, en unas 220-280 palabras.
 2. Usa SOLO los datos y titulares que se te dan. No inventes cifras, fechas, eventos ni causas. Si algo no consta, no lo menciones.
-3. Cuando cites un hecho que venga de un titular, atribúyelo a su fuente (por ejemplo, "según CNBC").
-4. Las variaciones porcentuales de la tabla son reales: puedes citarlas tal cual.
-5. En "Qué vigilar esta semana" menciona solo eventos que aparezcan en los titulares. Si no hay ninguno, di que las fuentes no anticipan eventos concretos.
-6. No des recomendaciones de compra o venta ni predicciones de precios.
-7. Formato: exactamente tres párrafos separados por una línea en blanco. Cada párrafo empieza por su etiqueta: "Cómo llegamos:", "Qué vigilar esta semana:", "Riesgos:". Texto plano, sin listas, sin markdown y sin emojis."""
+3. Cuando cites un hecho que venga de un titular, atribúyelo a su fuente (por ejemplo, "según CNBC"), y no lo generalices ni lo reinterpretes más allá de lo que dice el titular. En especial, si un titular describe una decisión de una institución (un banco central, un gobierno, un organismo), no se la atribuyas a una sola persona salvo que el propio titular lo haga explícitamente: di "el BCE decidió...", no "su presidente decidió...", a menos que el titular hable solo de esa persona.
+4. Las variaciones porcentuales de la tabla de MERCADO son reales: puedes citarlas tal cual.
+5. En "Cómo llegamos" repasa TODOS los activos de la tabla MERCADO, aunque sea en una frase breve para los que apenas se han movido; no te centres solo en los que más subieron o bajaron. Agrupa los que se muevan por motivos parecidos.
+6. En "Qué vigilar esta semana" da preferencia a titulares que hablen de algo que vaya a pasar (una reunión, una decisión, una fecha, unos datos que se publiquen próximamente), no solo a lo ya ocurrido. Si ningún titular anticipa algo así, dilo explícitamente en vez de rellenar con noticias pasadas.
+7. No des recomendaciones de compra o venta ni predicciones de precios.
+8. Formato: exactamente tres párrafos separados por una línea en blanco. Cada párrafo empieza por su etiqueta: "Cómo llegamos:", "Qué vigilar esta semana:", "Riesgos:". Texto plano, sin listas, sin markdown y sin emojis."""
 
 
 def build_prompt(data: dict, headlines: list, now: datetime) -> str:
