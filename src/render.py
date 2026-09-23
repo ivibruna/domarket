@@ -18,11 +18,11 @@ DEFAULT_BRAND = {
     "avatar_url": "",
 }
 
-GREEN, RED, GREY = "#1a7f37", "#cf222e", "#57606a"
+GREEN, RED, GREY, BLUE = "#1a7f37", "#cf222e", "#57606a", "#1177eb"
 
 DISCLAIMER = (
-    "Datos de Yahoo Finance (pueden tener retraso o errores)."
-    "Correo generado automáticamente."
+    "Datos de Yahoo Finance. "
+    "Correo automatizado."
 )
 
 
@@ -118,9 +118,9 @@ def _watch_rows(quotes: List[Quote]) -> List[str]:
 
 
 ACCENTS = {
-    "blue":  ("#488ddd", "#b3cce9"),
-    "amber": ("#b69045", "#ccc3ac"),
-    "gray":  ("#9da2a7", "#D0D2D6"),
+    "blue":  ("#5a97dd", "#a1bfe0"),
+    "amber": ("#d1ab5f", "#ddd1b1"),
+    "gray":  ("#D7DAE2", "#D7DAE2"),
 }
 
 
@@ -147,8 +147,7 @@ def _headlines_html(headlines) -> str:
     return f'<ul style="margin:0;padding-left:18px;">{"".join(items)}</ul>'
 
 
-AI_NOTE = ("Texto generado automáticamente por un modelo de IA a partir de los datos y titulares de este "
-           "correo; puede contener errores.")
+AI_NOTE = ("Texto generado automáticamente por un modelo de IA")
 
 
 def _analysis_html(text: str) -> str:
@@ -194,8 +193,8 @@ def _signature_html(brand: dict) -> str:
         f'color:#1f2328;font-weight:600;white-space:nowrap;">{who}</td>'
         f'<td style="text-align:right;vertical-align:middle;">{chips}</td>'
         f'</tr></table>'
-        f'<p style="margin:8px 0 0;font-size:10px;color:{GREY};">Contenido personal, no es asesoramiento '
-        f'de ninguna entidad ni empleador.</p>'
+        f'<p style="margin:12px 0 0;font-size:12px;color:{BLUE};">Hasta la semana que viene! '
+        f'</p>'
     )
 
 
@@ -269,7 +268,7 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
 {general}
 {watch}
 {news}
-<p style="margin:28px 0 0;padding-top:12px;border-top:1px solid #eaeef2;font-size:11px;color:{GREY};">{escape(DISCLAIMER)}</p>
+<p style="margin:28px 0 0;padding-top:9px;border-top:4px solid #eaeef2;font-size:10px;color:{GREY};">{escape(DISCLAIMER)}</p>
 {_signature_html(brand)}
 </td></tr></table>
 </td></tr></table>
