@@ -3,7 +3,8 @@ general:
   # "unit" es solo una etiqueta para el correo (no convierte divisas): "pts" para índices,
   # "$" para materias primas en dólares, "€" para Bitcoin, "" para un tipo de cambio (ratio).
   - {symbol: "^IBEX",     name: "IBEX 35",       unit: "pts"}
-  - {symbol: "0P0001CLDK", name: "MSCI World (Fidelity EUR)", unit: "€"}  # Fidelity MSCI World Index Fund EUR P Acc, ISIN IE00BYX5NX33  - {symbol: "^GSPC",     name: "S&P 500",       unit: "pts"}
+  #- {symbol: "0P0001CLDK", name: "MSCI World (Fidelity EUR)", unit: "€"}  # Fidelity MSCI World Index Fund EUR P Acc, ISIN IE00BYX5NX33  - {symbol: "^GSPC",     name: "S&P 500",       unit: "pts"}
+  - {symbol: "URTH",      name: "MSCI World (URTH)", unit: "$"}
   - {symbol: "CL=F",      name: "Petróleo WTI",  unit: "$"}
   - {symbol: "BZ=F",      name: "Petróleo Brent", unit: "$"}
   - {symbol: "GC=F",      name: "Oro",           unit: "$"}

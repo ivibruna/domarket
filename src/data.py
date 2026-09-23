@@ -21,6 +21,7 @@ class Metrics:
 class Quote:
     symbol: str
     name: str
+    unit: str = ""
     metrics: Optional[Metrics] = None
     error: Optional[str] = None
 
