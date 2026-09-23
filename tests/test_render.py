@@ -22,7 +22,7 @@ class FormatTest(unittest.TestCase):
 class RenderTest(unittest.TestCase):
     def test_demo_html_contains_sections_and_banner(self):
         html = render_html(demo_data(), NOW, demo=True)
-        for expected in ("Mercado general", "Mi seguimiento", "IBEX 35",
+        for expected in ("Mercado general", "Mi cartera", "IBEX 35",
                          "Nueva Expresión Textil", "DATOS DE EJEMPLO", "lunes 28 de septiembre de 2026"):
             self.assertIn(expected, html)
 
@@ -34,12 +34,12 @@ class RenderTest(unittest.TestCase):
         html = render_html(data, NOW)
         self.assertIn("Datos no disponibles", html)
         self.assertIn("Activo &lt;roto&gt;", html)  # escapado
-        self.assertNotIn("Mi seguimiento", html)
+        self.assertNotIn("Mi cartera", html)
 
     def test_text_version(self):
         text = render_text(demo_data(), NOW, demo=True)
         self.assertIn("IBEX 35", text)
-        self.assertIn("MI SEGUIMIENTO", text)
+        self.assertIn("MI CARTERA", text)
 
 
 
@@ -77,3 +77,28 @@ class AnalysisRenderTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BrandTest(unittest.TestCase):
+    BRAND = {"title": "DOMarket Weekly Brief", "website": "https://www.ivanbruna.com/",
+             "author": "Iván Bruna", "linkedin": "https://www.linkedin.com/in/ivanbrunaabad/"}
+
+    def test_default_title_when_no_brand(self):
+        html = render_html(demo_data(), NOW)
+        self.assertIn("DOMarket Weekly Brief", html)  # el título por defecto ya es este
+
+    def test_custom_brand_header_and_signature(self):
+        html = render_html(demo_data(), NOW, brand=self.BRAND)
+        self.assertIn("DOMarket Weekly Brief", html)
+        self.assertIn('href="https://www.ivanbruna.com/"', html)
+        self.assertIn("Iván Bruna", html)
+        self.assertIn('href="https://www.linkedin.com/in/ivanbrunaabad/"', html)
+        text = render_text(demo_data(), NOW, brand=self.BRAND)
+        self.assertIn("DOMARKET WEEKLY BRIEF", text)
+        self.assertIn("Escrito por Iván Bruna", text)
+        self.assertIn("https://www.linkedin.com/in/ivanbrunaabad/", text)
+
+    def test_no_brand_fields_no_signature_line(self):
+        html = render_html(demo_data(), NOW, brand={"title": "X"})
+        self.assertNotIn("Escrito por", html)
+        self.assertNotIn("contenido personal", html)

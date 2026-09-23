@@ -12,8 +12,13 @@ class BuildMessageTest(unittest.TestCase):
         msg = build_message("Asunto", "<p>hola</p>", "hola", "a@x.com", ["b@x.com", "c@x.com"])
         self.assertEqual(msg["Subject"], "Asunto")
         self.assertEqual(msg["To"], "b@x.com, c@x.com")
+        self.assertEqual(msg["From"], "a@x.com")  # sin sender_name, el From es solo el correo
         types = [p.get_content_type() for p in msg.iter_parts()]
         self.assertEqual(types, ["text/plain", "text/html"])
+
+    def test_sender_name_sets_display_name(self):
+        msg = build_message("Asunto", "<p>h</p>", "h", "a@x.com", ["b@x.com"], sender_name="Mi Newsletter")
+        self.assertEqual(msg["From"], "Mi Newsletter <a@x.com>")
 
 
 class SettingsTest(unittest.TestCase):
@@ -29,6 +34,12 @@ class SettingsTest(unittest.TestCase):
         self.assertEqual(cfg["password"], "abcdefghijklmnop")
         self.assertEqual(cfg["to"], ["b@x.com", "c@x.com"])
         self.assertEqual((cfg["host"], cfg["port"]), ("smtp.gmail.com", 465))
+        self.assertEqual(cfg["sender_name"], "Resumen de Mercado")
+
+    def test_sender_name_from_env(self):
+        env = {"SMTP_USER": "a@x.com", "SMTP_PASSWORD": "x", "MAIL_TO": "b@x.com", "SENDER_NAME": "Mi Newsletter"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(mail_settings_from_env()["sender_name"], "Mi Newsletter")
 
 
 class SendTest(unittest.TestCase):

@@ -25,8 +25,6 @@ def demo_data() -> dict:
         ],
         "watchlist": [
             Quote("NXT.MC", "Nueva Expresión Textil", _m(1.0, -3.5, 2.1, 1.2, 0.7)),
-            Quote("AMP.MC", "Amper", _m(1.0, -3.5, 2.1, 1.2, 0.7)),
-            Quote("OHLA.MC", "Obrascon Huarte Lain", _m(1.0, -3.5, 2.1, 1.2, 0.7)),
         ],
     }
 

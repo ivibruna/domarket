@@ -15,6 +15,7 @@ DEFAULT_BRAND = {
     "website": "",
     "author": "",
     "linkedin": "",
+    "avatar_url": "",
 }
 
 GREEN, RED, GREY = "#1a7f37", "#cf222e", "#57606a"
@@ -116,9 +117,21 @@ def _watch_rows(quotes: List[Quote]) -> List[str]:
     return rows
 
 
-def _section(title: str, body: str) -> str:
+ACCENTS = {
+    "blue":  ("#0969da", "#eef6ff"),
+    "amber": ("#9a6700", "#fff8e6"),
+    "gray":  ("#57606a", "#f6f8fa"),
+}
+
+
+def _section(title: str, body: str, accent: Optional[str] = None) -> str:
+    heading = f'<h2 style="font-size:16px;margin:0 0 10px;color:#1f2328;">{escape(title)}</h2>'
+    if accent is None:
+        return f'<div style="margin:28px 0 0;">{heading}{body}</div>'
+    border, bg = ACCENTS[accent]
     return (
-        f'<h2 style="font-size:16px;margin:28px 0 8px;color:#1f2328;">{escape(title)}</h2>{body}'
+        f'<div style="margin:28px 0 0;background:{bg};border-left:4px solid {border};'
+        f'border-radius:4px;padding:14px 16px;">{heading}{body}</div>'
     )
 
 
@@ -151,20 +164,40 @@ def _analysis_html(text: str) -> str:
     return "".join(paragraphs) + note
 
 
+def _chip(label: str, url: str) -> str:
+    return (
+        f'<a href="{escape(url, quote=True)}" style="display:inline-block;font-size:11px;color:#1f2328;'
+        f'text-decoration:none;border:1px solid #d0d7de;border-radius:12px;padding:3px 10px;margin:0 6px 0 0;">'
+        f'{escape(label)}</a>'
+    )
+
+
 def _signature_html(brand: dict) -> str:
     if not (brand.get("author") or brand.get("linkedin") or brand.get("website")):
         return ""
-    links = []
-    if brand.get("linkedin"):
-        links.append(f'<a href="{escape(brand["linkedin"], quote=True)}" style="color:{GREY};">LinkedIn</a>')
-    if brand.get("website"):
-        links.append(f'<a href="{escape(brand["website"], quote=True)}" style="color:{GREY};">Web</a>')
-    sep = ' <span style="color:#d0d7de;">&middot;</span> '
-    who = f'Escrito por {escape(brand["author"])}' if brand.get("author") else "Escrito de forma independiente"
-    line = who + ((sep + sep.join(links)) if links else "")
+    avatar = ""
+    if brand.get("avatar_url"):
+        avatar = (
+            f'<img src="{escape(brand["avatar_url"], quote=True)}" width="36" height="36" alt="" '
+            f'style="width:36px;height:36px;border-radius:50%;object-fit:cover;vertical-align:middle;'
+            f'border:1px solid #d0d7de;">'
+        )
+    who = escape(brand["author"]) if brand.get("author") else "Escrito de forma independiente"
+    chips = "".join([
+        _chip("LinkedIn", brand["linkedin"]) if brand.get("linkedin") else "",
+        _chip("Web", brand["website"]) if brand.get("website") else "",
+    ])
+    name_cell = (
+        f'<td style="padding-left:{"10px" if avatar else "0"};vertical-align:middle;">'
+        f'<div style="font-size:12px;color:#1f2328;font-weight:600;">{who}</div>'
+        f'<div style="margin-top:4px;">{chips}</div></td>'
+    )
     return (
-        f'<p style="margin:6px 0 0;font-size:11px;color:{GREY};">{line} '
-        f'&mdash; contenido personal, no es asesoramiento de ninguna entidad ni empleador.</p>'
+        f'<table role="presentation" cellspacing="0" cellpadding="0" style="margin:14px 0 0;"><tr>'
+        f'{f"<td style=\"vertical-align:middle;\">{avatar}</td>" if avatar else ""}'
+        f'{name_cell}</tr></table>'
+        f'<p style="margin:8px 0 0;font-size:10px;color:{GREY};">Contenido personal, no es asesoramiento '
+        f'de ninguna entidad ni empleador.</p>'
     )
 
 
@@ -172,7 +205,25 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
                 brand: Optional[dict] = None) -> str:
     brand = {**DEFAULT_BRAND, **(brand or {})}
     website_badge = ""
-    if brand.get("website"):
+    if brand.get("author") or brand.get("avatar_url"):
+        link_open, link_close = "", ""
+        if brand.get("website"):
+            link_open = f'<a href="{escape(brand["website"], quote=True)}" style="text-decoration:none;">'
+            link_close = "</a>"
+        avatar = ""
+        if brand.get("avatar_url"):
+            avatar = (
+                f'<img src="{escape(brand["avatar_url"], quote=True)}" width="32" height="32" alt="" '
+                f'style="width:32px;height:32px;border-radius:50%;object-fit:cover;vertical-align:middle;'
+                f'border:1px solid #d0d7de;">'
+            )
+        name = escape(brand.get("author", ""))
+        website_badge = (
+            f'<td style="text-align:right;vertical-align:top;white-space:nowrap;">{link_open}'
+            f'{avatar}<span style="font-size:13px;color:#1f2328;font-weight:600;vertical-align:middle;'
+            f'{"margin-left:8px;" if avatar else ""}">{name}</span>{link_close}</td>'
+        )
+    elif brand.get("website"):
         site_label = escape(brand["website"].replace("https://", "").replace("http://", "").rstrip("/"))
         website_badge = (
             f'<td style="text-align:right;vertical-align:top;"><a href="{escape(brand["website"], quote=True)}" '
@@ -190,16 +241,17 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
         "Mercado general",
         _table(["Activo", "Último", "1 sem.", "1 mes"], _general_rows(data.get("general", []))),
     )
-    analysis_html = _section("Análisis de la semana", _analysis_html(analysis)) if analysis else ""
-    news = _section("Titulares de la semana", _headlines_html(headlines)) if headlines else ""
+    analysis_html = _section("Análisis de la semana", _analysis_html(analysis), accent="gray") if analysis else ""
+    news = _section("Titulares de la semana", _headlines_html(headlines), accent="amber") if headlines else ""
     watch = ""
     if data.get("watchlist"):
         watch = _section(
-            "Mi seguimiento",
+            "Mi cartera",
             _table(
                 ["Valor", "Último", "1 sem.", "1 mes", "vs. máx. 52s", "Máx. 52s", "Mín. 52s"],
                 _watch_rows(data["watchlist"]),
             ),
+            accent="blue",
         )
     return f"""<!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
@@ -216,8 +268,8 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
 {website_badge}</tr></table>
 {analysis_html}
 {general}
-{news}
 {watch}
+{news}
 <p style="margin:28px 0 0;padding-top:12px;border-top:1px solid #eaeef2;font-size:11px;color:{GREY};">{escape(DISCLAIMER)}</p>
 {_signature_html(brand)}
 </td></tr></table>
@@ -239,7 +291,7 @@ def render_text(data: dict, now: datetime, demo: bool = False, headlines=None, a
     if analysis:
         lines += ["", "ANÁLISIS DE LA SEMANA", analysis, f"({AI_NOTE})"]
     lines += ["", "MERCADO GENERAL"]
-    for section, title in (("general", None), ("watchlist", "MI SEGUIMIENTO")):
+    for section, title in (("general", None), ("watchlist", "MI CARTERA")):
         if title:
             lines += ["", title]
         for q in data.get(section, []):
