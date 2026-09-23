@@ -21,8 +21,7 @@ DEFAULT_BRAND = {
 GREEN, RED, GREY = "#1a7f37", "#cf222e", "#57606a"
 
 DISCLAIMER = (
-    "Información con fines informativos; no constituye asesoramiento financiero ni una "
-    "recomendación de compra o venta. Datos de Yahoo Finance (pueden tener retraso o errores). "
+    "Datos de Yahoo Finance (pueden tener retraso o errores)."
     "Correo generado automáticamente."
 )
 
@@ -119,9 +118,9 @@ def _watch_rows(quotes: List[Quote]) -> List[str]:
 
 
 ACCENTS = {
-    "blue":  ("#0969da", "#eef6ff"),
-    "amber": ("#9a6700", "#fff8e6"),
-    "gray":  ("#57606a", "#f6f8fa"),
+    "blue":  ("#488ddd", "#b3cce9"),
+    "amber": ("#b69045", "#ccc3ac"),
+    "gray":  ("#9da2a7", "#D0D2D6"),
 }
 
 
@@ -160,7 +159,7 @@ def _analysis_html(text: str) -> str:
             para_html = f"<strong>{escape(label)}:</strong>{escape(rest)}"
         else:
             para_html = escape(para)
-        paragraphs.append(f'<p style="margin:0 0 10px;font-size:14px;line-height:1.5;">{para_html}</p>')
+        paragraphs.append(f'<p style="margin:0 0 14px;font-size:14px;line-height:1.6;text-align:justify;">{para_html}</p>')
     note = f'<p style="margin:0;font-size:11px;color:{GREY};font-style:italic;">{escape(AI_NOTE)}</p>'
     return "".join(paragraphs) + note
 
