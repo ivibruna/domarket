@@ -239,7 +239,7 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
         _table(["Activo", "Último", "1 sem.", "1 mes"], _general_rows(data.get("general", []))),
         accent="amber",
     )
-    analysis_html = _section("Análisis de la semana", _analysis_html(analysis), accent="gray") if analysis else ""
+    analysis_html = _section("Análisis de la semana", _analysis_html(analysis)) if analysis else ""
     news = _section("Titulares de la semana", _headlines_html(headlines)) if headlines else ""
     watch = ""
     if data.get("watchlist"):
