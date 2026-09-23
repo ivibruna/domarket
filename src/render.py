@@ -44,8 +44,9 @@ def fmt_pct(x) -> str:
 
 
 def fmt_date_long(d: datetime) -> str:
+    dia = DIAS[d.weekday()].capitalize()
     mes = MESES[d.month - 1].capitalize()
-    return f"{DIAS[d.weekday()]} {d.day} de {mes} de {d.year}"
+    return f"{dia} {d.day} de {mes} de {d.year}"
 
 
 def _pct_html(x) -> str:
@@ -167,9 +168,9 @@ def _analysis_html(text: str) -> str:
     
     # IDEA 3: Diccionario automático de iconos según la etiqueta
     icons = {
-        "Cómo llegamos": '<img src="https://img.icons8.com/ios-filled/50/0969da/bar-chart.png" width="16" height="16" style="vertical-align:middle; margin-bottom:2px; margin-right:4px;" alt="📊">',
-        "Qué vigilar esta semana": '<img src="https://iconos8.es/icon/104253/accuracy" width="16" height="16" style="vertical-align:middle; margin-bottom:2px; margin-right:4px;" alt="🔭">',
-        "Riesgos": '<img src="https://iconos8.es/icon/mzptW6YUDftW/radioactive" width="16" height="16" style="vertical-align:middle; margin-bottom:2px; margin-right:4px;" alt="⚠️">'
+        "Cómo llegamos": '<img src="https://img.icons8.com/?size=100&id=42890&format=png&color=000000" width="16" height="16" style="vertical-align:middle; margin-bottom:2px; margin-right:4px;" alt="📊">',
+        "Qué vigilar esta semana": '<img src="https://img.icons8.com/?size=100&id=104253&format=png&color=000000" width="16" height="16" style="vertical-align:middle; margin-bottom:2px; margin-right:4px;" alt="🔭">',
+        "Riesgos": '<img src="https://img.icons8.com/?size=100&id=mzptW6YUDftW&format=png&color=000000" width="16" height="16" style="vertical-align:middle; margin-bottom:2px; margin-right:4px;" alt="⚠️">'
     }
     
     for para in [p.strip() for p in text.split("\n\n") if p.strip()]:
@@ -183,9 +184,8 @@ def _analysis_html(text: str) -> str:
             # IDEA 2: Creamos la "píldora" (badge) con fondo azul suave y bordes redondeados
             badge_html = (
                 f'<div style="margin-bottom:8px;">'
-                f'<span style="display:inline-block; background-color:#e2efff; color:#0969da; '
-                f'border:1px solid #cce2ff; padding:3px 9px; border-radius:6px; '
-                f'font-weight:600; font-size:13px;">'
+                f'<span style="display:inline-block; background-color:#eef6ff; color:#0969da; '
+                f'padding:4px 10px; border-radius:6px; font-weight:600; font-size:13px;">'
                 f'{icon} {escape(clean_label)}'
                 f'</span>'
                 f'</div>'
@@ -307,9 +307,10 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
 <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="max-width:640px;width:100%;background:#ffffff;border:1px solid #d0d7de;">
 <tr><td style="padding:24px;">
 {banner}
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
-<td><h1 style="font-size:22px;margin:0;letter-spacing:-0.3px;">{escape(brand["title"])}</h1>
-<p style="margin:4px 0 0;font-size:13px;color:{GREY};">{escape(fmt_date_long(now))}</p></td>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-bottom:1px solid #e5e7eb; padding-bottom:16px;"><tr>
+<td style="vertical-align:middle;">
+<h1 style="font-size:24px; margin:0; font-weight:800; letter-spacing:-0.5px; color:#111827;">{escape(brand["title"])}</h1>
+<p style="margin:4px 0 0; font-size:13px; color:{GREY};">{escape(fmt_date_long(now))}</p></td>
 {website_badge}</tr></table>
 {analysis_html}
 {general}
