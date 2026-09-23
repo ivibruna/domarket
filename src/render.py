@@ -27,14 +27,15 @@ DISCLAIMER = (
 
 
 # ---------- formato ----------
-def fmt_num(x, decimals=None) -> str:
-    """Número con formato español (1.234,56). 4 decimales si el valor es < 2."""
+def fmt_num(x, decimals=None, unit: str = "") -> str:
+    """Número con formato español (1.234,56). 4 decimales si el valor es < 2. `unit` se añade al final."""
     if x is None:
         return "—"
     if decimals is None:
         decimals = 4 if abs(x) < 2 else 2
     s = f"{x:,.{decimals}f}"
-    return s.replace(",", "§").replace(".", ",").replace("§", ".")
+    s = s.replace(",", "§").replace(".", ",").replace("§", ".")
+    return f"{s} {unit}" if unit else s
 
 
 def fmt_pct(x) -> str:
@@ -91,7 +92,7 @@ def _general_rows(quotes: List[Quote]) -> List[str]:
         m = q.metrics
         rows.append(
             f'<tr><td style="{_TD}"><strong>{escape(q.name)}</strong></td>'
-            f'<td style="{_TD}text-align:right;white-space:nowrap;">{fmt_num(m.last)}</td>'
+            f'<td style="{_TD}text-align:right;white-space:nowrap;">{fmt_num(m.last, unit=q.unit)}</td>'
             f'<td style="{_TD}text-align:right;white-space:nowrap;">{_pct_html(m.change_1w)}</td>'
             f'<td style="{_TD}text-align:right;white-space:nowrap;">{_pct_html(m.change_1m)}</td></tr>'
         )
@@ -108,12 +109,12 @@ def _watch_rows(quotes: List[Quote]) -> List[str]:
         rows.append(
             f'<tr><td style="{_TD}"><strong>{escape(q.name)}</strong><br>'
             f'<span style="font-size:11px;color:{GREY};">{escape(q.symbol)} · dato a {m.last_date.strftime("%d/%m/%Y")}</span></td>'
-            f'<td style="{_TD}text-align:right;white-space:nowrap;">{fmt_num(m.last)}</td>'
+            f'<td style="{_TD}text-align:right;white-space:nowrap;">{fmt_num(m.last, unit=q.unit)}</td>'
             f'<td style="{_TD}text-align:right;white-space:nowrap;">{_pct_html(m.change_1w)}</td>'
             f'<td style="{_TD}text-align:right;white-space:nowrap;">{_pct_html(m.change_1m)}</td>'
             f'<td style="{_TD}text-align:right;white-space:nowrap;">{_pct_html(m.from_high_pct)}</td>'
-            f'<td style="{_TD}text-align:right;white-space:nowrap;">{fmt_num(m.high_52w)}</td>'
-            f'<td style="{_TD}text-align:right;white-space:nowrap;">{fmt_num(m.low_52w)}</td></tr>'
+            f'<td style="{_TD}text-align:right;white-space:nowrap;">{fmt_num(m.high_52w, unit=q.unit)}</td>'
+            f'<td style="{_TD}text-align:right;white-space:nowrap;">{fmt_num(m.low_52w, unit=q.unit)}</td></tr>'
         )
     return rows
 
@@ -378,7 +379,7 @@ def render_text(data: dict, now: datetime, demo: bool = False, headlines=None, a
             else:
                 m = q.metrics
                 lines.append(
-                    f"- {q.name}: {fmt_num(m.last)} (1 sem. {fmt_pct(m.change_1w)}, 1 mes {fmt_pct(m.change_1m)})"
+                    f"- {q.name}: {fmt_num(m.last, unit=q.unit)} (1 sem. {fmt_pct(m.change_1w)}, 1 mes {fmt_pct(m.change_1m)})"
                 )
     if headlines:
         lines += ["", "TITULARES DE LA SEMANA"]
