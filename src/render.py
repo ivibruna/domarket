@@ -150,7 +150,7 @@ def _headlines_html(headlines) -> str:
 AI_NOTE = ("Texto generado automáticamente por un modelo de IA")
 
 
-def _analysis_html(text: str) -> str:
+"""def _analysis_html(text: str) -> str:
     paragraphs = []
     for para in [p.strip() for p in text.split("\n\n") if p.strip()]:
         label, sep, rest = para.partition(":")
@@ -161,7 +161,53 @@ def _analysis_html(text: str) -> str:
         paragraphs.append(f'<p style="margin:0 0 14px;font-size:14px;line-height:1.6;text-align:justify;">{para_html}</p>')
     note = f'<p style="margin:0;font-size:11px;color:{GREY};font-style:italic;">{escape(AI_NOTE)}</p>'
     return "".join(paragraphs) + note
-
+"""
+def _analysis_html(text: str) -> str:
+    paragraphs = []
+    
+    # IDEA 3: Diccionario automático de iconos según la etiqueta
+    icons = {
+        "Cómo llegamos": "📊",
+        "Qué vigilar esta semana": "🔭",
+        "Riesgos": "⚠️"
+    }
+    
+    for para in [p.strip() for p in text.split("\n\n") if p.strip()]:
+        label, sep, rest = para.partition(":")
+        
+        if sep and len(label) <= 40:
+            clean_label = label.strip()
+            # Asigna el icono o usa una chincheta 📌 por defecto si no lo reconoce
+            icon = icons.get(clean_label, "📌")
+            
+            # IDEA 2: Creamos la "píldora" (badge) con fondo azul suave y bordes redondeados
+            badge_html = (
+                f'<div style="margin-bottom:8px;">'
+                f'<span style="display:inline-block; background-color:#eef6ff; color:#0969da; '
+                f'padding:4px 10px; border-radius:6px; font-weight:600; font-size:13px;">'
+                f'{icon} {escape(clean_label)}'
+                f'</span>'
+                f'</div>'
+            )
+            
+            # IDEA 1: El texto va en su propio bloque debajo de la píldora, justificado y con aire
+            text_html = (
+                f'<div style="margin:0 0 24px; font-size:14px; line-height:1.6; '
+                f'text-align:justify; color:#374151;">{escape(rest.strip())}</div>'
+            )
+            
+            para_html = badge_html + text_html
+        else:
+            # Por si entra un párrafo sin etiqueta de dos puntos (:)
+            para_html = (
+                f'<div style="margin:0 0 24px; font-size:14px; line-height:1.6; '
+                f'text-align:justify; color:#374151;">{escape(para)}</div>'
+            )
+            
+        paragraphs.append(para_html)
+        
+    note = f'<p style="margin:0;font-size:11px;color:{GREY};font-style:italic;">{escape(AI_NOTE)}</p>'
+    return "".join(paragraphs) + note
 
 def _chip(label: str, url: str) -> str:
     return (
