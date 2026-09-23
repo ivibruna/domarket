@@ -309,7 +309,7 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
 {banner}
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-bottom:1px solid #e5e7eb; padding-bottom:16px;"><tr>
 <td style="vertical-align:middle;">
-<h1 style="font-size:24px; margin:0; font-weight:800; letter-spacing:-0.5px; color:#111827;">{escape(brand["title"])}</h1>
+<h1 style="font-size:22px; margin:0; font-weight:700; letter-spacing:0.3px; color:#151e2d;">{escape(brand["title"])}</h1>
 <p style="margin:4px 0 0; font-size:13px; color:{GREY};">{escape(fmt_date_long(now))}</p></td>
 {website_badge}</tr></table>
 {analysis_html}
