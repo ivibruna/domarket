@@ -167,9 +167,9 @@ def _analysis_html(text: str) -> str:
     
     # IDEA 3: Diccionario automático de iconos según la etiqueta
     icons = {
-        "Cómo llegamos": "📊",
-        "Qué vigilar esta semana": "🔭",
-        "Riesgos": "⚠️"
+        "Cómo llegamos": '<img src="https://img.icons8.com/ios-filled/50/0969da/bar-chart.png" width="16" height="16" style="vertical-align:middle; margin-bottom:2px; margin-right:4px;" alt="📊">',
+        "Qué vigilar esta semana": '<img src="https://iconos8.es/icon/104253/accuracy" width="16" height="16" style="vertical-align:middle; margin-bottom:2px; margin-right:4px;" alt="🔭">',
+        "Riesgos": '<img src="https://iconos8.es/icon/mzptW6YUDftW/radioactive" width="16" height="16" style="vertical-align:middle; margin-bottom:2px; margin-right:4px;" alt="⚠️">'
     }
     
     for para in [p.strip() for p in text.split("\n\n") if p.strip()]:
@@ -183,8 +183,9 @@ def _analysis_html(text: str) -> str:
             # IDEA 2: Creamos la "píldora" (badge) con fondo azul suave y bordes redondeados
             badge_html = (
                 f'<div style="margin-bottom:8px;">'
-                f'<span style="display:inline-block; background-color:#eef6ff; color:#0969da; '
-                f'padding:4px 10px; border-radius:6px; font-weight:600; font-size:13px;">'
+                f'<span style="display:inline-block; background-color:#e2efff; color:#0969da; '
+                f'border:1px solid #cce2ff; padding:3px 9px; border-radius:6px; '
+                f'font-weight:600; font-size:13px;">'
                 f'{icon} {escape(clean_label)}'
                 f'</span>'
                 f'</div>'
