@@ -45,7 +45,8 @@ def fmt_pct(x) -> str:
 
 
 def fmt_date_long(d: datetime) -> str:
-    return f"{DIAS[d.weekday()]} {d.day} de {MESES[d.month - 1]} de {d.year}"
+    mes = MESES[d.month - 1].capitalize()
+    return f"{DIAS[d.weekday()]} {d.day} de {mes} de {d.year}"
 
 
 def _pct_html(x) -> str:
@@ -187,15 +188,13 @@ def _signature_html(brand: dict) -> str:
         _chip("LinkedIn", brand["linkedin"]) if brand.get("linkedin") else "",
         _chip("Web", brand["website"]) if brand.get("website") else "",
     ])
-    name_cell = (
-        f'<td style="padding-left:{"10px" if avatar else "0"};vertical-align:middle;">'
-        f'<div style="font-size:12px;color:#1f2328;font-weight:600;">{who}</div>'
-        f'<div style="margin-top:4px;">{chips}</div></td>'
-    )
     return (
-        f'<table role="presentation" cellspacing="0" cellpadding="0" style="margin:14px 0 0;"><tr>'
-        f'{f"<td style=\"vertical-align:middle;\">{avatar}</td>" if avatar else ""}'
-        f'{name_cell}</tr></table>'
+        f'<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:14px 0 0;"><tr>'
+        f'{f"<td style=\"vertical-align:middle;width:36px;\">{avatar}</td>" if avatar else ""}'
+        f'<td style="padding-left:{"10px" if avatar else "0"};vertical-align:middle;font-size:12px;'
+        f'color:#1f2328;font-weight:600;white-space:nowrap;">{who}</td>'
+        f'<td style="text-align:right;vertical-align:middle;">{chips}</td>'
+        f'</tr></table>'
         f'<p style="margin:8px 0 0;font-size:10px;color:{GREY};">Contenido personal, no es asesoramiento '
         f'de ninguna entidad ni empleador.</p>'
     )
@@ -240,9 +239,10 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
     general = _section(
         "Mercado general",
         _table(["Activo", "Último", "1 sem.", "1 mes"], _general_rows(data.get("general", []))),
+        accent="amber",
     )
     analysis_html = _section("Análisis de la semana", _analysis_html(analysis), accent="gray") if analysis else ""
-    news = _section("Titulares de la semana", _headlines_html(headlines), accent="amber") if headlines else ""
+    news = _section("Titulares de la semana", _headlines_html(headlines)) if headlines else ""
     watch = ""
     if data.get("watchlist"):
         watch = _section(
