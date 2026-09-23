@@ -136,7 +136,7 @@ def _section(title: str, body: str, accent: Optional[str] = None) -> str:
     )
 
 
-def _headlines_html(headlines) -> str:
+"""def _headlines_html(headlines) -> str:
     items = []
     for h in headlines:
         link = escape(h.link, quote=True) if h.link.startswith(("http://", "https://")) else "#"
@@ -146,6 +146,38 @@ def _headlines_html(headlines) -> str:
             f'<span style="font-size:11px;color:{GREY};">{escape(h.source)} · {h.published.strftime("%d/%m")}</span></li>'
         )
     return f'<ul style="margin:0;padding-left:18px;">{"".join(items)}</ul>'
+"""
+def _headlines_html(headlines) -> str:
+    if not headlines:
+        return ""
+        
+    # Extraemos el primer titular como "Héroe" o principal
+    hero = headlines[0]
+    hero_link = escape(hero.link, quote=True) if hero.link.startswith(("http://", "https://")) else "#"
+    
+    # Diseño de la noticia principal (sin viñeta, letra más grande y oscura)
+    html = (
+        f'<div style="margin-bottom:18px; padding-bottom:18px; border-bottom:1px solid #e5e7eb;">'
+        f'<span style="font-size:11px; font-weight:700; color:#0969da; text-transform:uppercase; letter-spacing:0.5px;">Noticia Destacada</span><br>'
+        f'<a href="{hero_link}" style="display:inline-block; margin-top:6px; font-size:18px; font-weight:700; color:#111827; text-decoration:none; line-height:1.3;">{escape(hero.title)}</a><br>'
+        f'<span style="font-size:12px; color:{GREY}; display:inline-block; margin-top:6px;">{escape(hero.source)} · {hero.published.strftime("%d/%m")}</span>'
+        f'</div>'
+    )
+    
+    # Diseño del resto de titulares (la lista secundaria)
+    if len(headlines) > 1:
+        items = []
+        for h in headlines[1:]:
+            link = escape(h.link, quote=True) if h.link.startswith(("http://", "https://")) else "#"
+            items.append(
+                f'<li style="margin:0 0 12px; font-size:14px; line-height:1.5;">'
+                f'<a href="{link}" style="color:#0969da; text-decoration:none; font-weight:500;">{escape(h.title)}</a><br>'
+                f'<span style="font-size:11px; color:{GREY};">{escape(h.source)} · {h.published.strftime("%d/%m")}</span></li>'
+            )
+        # Añadimos la lista debajo del bloque principal
+        html += f'<ul style="margin:0; padding-left:18px; color:#374151;">{"".join(items)}</ul>'
+        
+    return html
 
 
 AI_NOTE = ("Texto generado automáticamente por un modelo de IA")
