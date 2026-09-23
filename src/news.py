@@ -22,6 +22,7 @@ class Headline:
     link: str
     published: datetime  # siempre con zona horaria (UTC)
     score: int = 0
+    lang: str = "en"  # idioma del feed de origen ("es" para fuentes en castellano)
 
 
 def _parse_date(text: Optional[str]) -> Optional[datetime]:
@@ -99,11 +100,27 @@ def collect_headlines(news_cfg: dict, now: datetime,
                 continue
             seen.add(key)
             h.score = hits + (2 if feed.get("priority") else 0)
+            h.lang = feed.get("lang", "en")
             kept.append(h)
         kept.sort(key=lambda h: (h.score, h.published), reverse=True)
         pool.extend(kept[:per_feed])
     pool.sort(key=lambda h: (h.score, h.published), reverse=True)
     return pool[: news_cfg.get("max_total", 12)]
+
+
+def select_for_email(headlines: List[Headline], total: int = 4) -> List[Headline]:
+    """De la pool ya recogida, deja como máximo `total` titulares para imprimir en el correo:
+    el mejor en español primero (si hay alguno), y a continuación los más relevantes del resto,
+    sin repetir. Si no hay ninguno en español, se limita a los `total` mejores en general."""
+    if total <= 0 or not headlines:
+        return []
+    ranked = sorted(headlines, key=lambda h: (h.score, h.published), reverse=True)
+    spanish = [h for h in ranked if h.lang == "es"]
+    others = [h for h in ranked if h.lang != "es"]
+    result = [spanish[0]] if spanish else []
+    remaining = total - len(result)
+    result += others[:remaining]
+    return result
 
 
 def check_feeds(news_cfg: dict, now: datetime) -> None:

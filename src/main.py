@@ -14,7 +14,7 @@ from pathlib import Path
 from .data import fetch_all, load_config
 from .demo import demo_data, demo_headlines, demo_summary
 from .env import load_dotenv
-from .news import collect_headlines
+from .news import collect_headlines, select_for_email
 from .render import render_html, render_text
 from .summary import generate_summary
 from .send import build_message, mail_settings_from_env, send_email
@@ -45,12 +45,16 @@ def main() -> None:
     if not args.demo and _all_failed(data):
         raise SystemExit("No se pudo obtener ningún dato: no se genera ni se envía el correo.")
 
+    # El análisis de IA usa toda la pool de titulares para tener más contexto; el correo
+    # solo imprime una selección curada (1 en español primero, si lo hay, + el resto).
+    email_headlines = select_for_email(headlines, cfg.get("news", {}).get("email_headlines", 4))
+
     now = datetime.now()
     analysis = None
     if args.ai:
         analysis = demo_summary() if args.demo else generate_summary(data, headlines, now, cfg.get("summary"))
-    html = render_html(data, now, demo=args.demo, headlines=headlines, analysis=analysis, brand=cfg.get("brand"))
-    text = render_text(data, now, demo=args.demo, headlines=headlines, analysis=analysis, brand=cfg.get("brand"))
+    html = render_html(data, now, demo=args.demo, headlines=email_headlines, analysis=analysis, brand=cfg.get("brand"))
+    text = render_text(data, now, demo=args.demo, headlines=email_headlines, analysis=analysis, brand=cfg.get("brand"))
     Path(args.out).write_text(html, encoding="utf-8")
     print(f"Vista previa guardada en {args.out}")
 

@@ -1,24 +1,29 @@
 # Símbolos en formato Yahoo Finance. Se validan en la primera ejecución real.
 general:
-  - {symbol: "^IBEX",     name: "IBEX 35"}
-  - {symbol: "^STOXX50E", name: "Euro Stoxx 50"}
-  - {symbol: "^GSPC",     name: "S&P 500"}
-  - {symbol: "CL=F",      name: "Petróleo WTI"}
-  - {symbol: "BZ=F",      name: "Petróleo Brent"}
-  - {symbol: "GC=F",      name: "Oro"}
-  - {symbol: "BTC-EUR",   name: "Bitcoin (EUR)"}
-  - {symbol: "EURUSD=X",  name: "EUR/USD"}
+  # "unit" es solo una etiqueta para el correo (no convierte divisas): "pts" para índices,
+  # "$" para materias primas en dólares, "€" para Bitcoin, "" para un tipo de cambio (ratio).
+  - {symbol: "^IBEX",     name: "IBEX 35",       unit: "pts"}
+  - {symbol: "^STOXX50E", name: "Euro Stoxx 50", unit: "pts"}
+  - {symbol: "^GSPC",     name: "S&P 500",       unit: "pts"}
+  - {symbol: "CL=F",      name: "Petróleo WTI",  unit: "$"}
+  - {symbol: "BZ=F",      name: "Petróleo Brent", unit: "$"}
+  - {symbol: "GC=F",      name: "Oro",           unit: "$"}
+  - {symbol: "BTC-EUR",   name: "Bitcoin (EUR)", unit: "€"}
+  - {symbol: "EURUSD=X",  name: "EUR/USD",       unit: ""}
 
 watchlist:
   - symbol: "NXT.MC"          # cotización principal en Madrid (EUR)
     name: "Nueva Expresión Textil"
     isin: "ES0126962069"      # identificador de referencia
+    unit: "€"
   - symbol: "AMP.MC"          # cotización principal en Madrid (EUR)
     name: "Amper"
     isin: "ES0109260291"
+    unit: "€"
   - symbol: "OHLA.MC"         # cotización principal en Madrid (EUR)
     name: "Obrascón Huarte Lain"
     isin: "ES0142090317"
+    unit: "€"
 
 # Titulares: feeds RSS/Atom. Cada feed puede llevar:
 #   priority: true       -> suma puntos (fuentes oficiales, siempre relevantes)
@@ -27,12 +32,13 @@ watchlist:
 news:
   days: 7            # ventana de días hacia atrás
   max_per_feed: 6
-  max_total: 12
+  max_total: 14
+  email_headlines: 4  # cuántos titulares se imprimen en el correo: 1 en español (El Economista) + el resto internacionales
   feeds:
     - {name: "CNBC Finance",            url: "https://www.cnbc.com/id/10000664/device/rss/rss.html"}
     - {name: "CNBC Top News",           url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", only_keywords: true}
     - {name: "MarketWatch",             url: "https://feeds.content.dowjones.io/public/rss/mw_topstories"}
-    - {name: "elEconomista Mercados",   url: "https://www.eleconomista.es/rss/rss-mercados.php"}  # sin verificar: valida con python -m src.news
+    - {name: "elEconomista Mercados",   url: "https://www.eleconomista.es/rss/rss-mercados.php", lang: "es"}  # sin verificar: valida con python -m src.news
     - {name: "BBC Business",            url: "https://feeds.bbci.co.uk/news/business/rss.xml"}
     - {name: "BBC World",               url: "https://feeds.bbci.co.uk/news/world/rss.xml", only_keywords: true}
     - {name: "BCE",                     url: "https://www.ecb.europa.eu/rss/press.xml", priority: true, only_keywords: true}
