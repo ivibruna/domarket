@@ -1,7 +1,7 @@
 """Plantilla del correo semanal: HTML con estilos en línea + versión de texto plano."""
 from datetime import datetime
 from html import escape
-from typing import List
+from typing import List, Optional
 
 from .data import Quote
 
@@ -9,10 +9,19 @@ DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "doming
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
          "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
 
+
+DEFAULT_BRAND = {
+    "title": "DOMarket Weekly Brief",
+    "website": "",
+    "author": "",
+    "linkedin": "",
+}
+
 GREEN, RED, GREY = "#1a7f37", "#cf222e", "#57606a"
 
 DISCLAIMER = (
-    "Datos de Yahoo Finance. "
+    "Información con fines informativos; no constituye asesoramiento financiero ni una "
+    "recomendación de compra o venta. Datos de Yahoo Finance (pueden tener retraso o errores). "
     "Correo generado automáticamente."
 )
 
@@ -142,7 +151,34 @@ def _analysis_html(text: str) -> str:
     return "".join(paragraphs) + note
 
 
-def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, analysis=None) -> str:
+def _signature_html(brand: dict) -> str:
+    if not (brand.get("author") or brand.get("linkedin") or brand.get("website")):
+        return ""
+    links = []
+    if brand.get("linkedin"):
+        links.append(f'<a href="{escape(brand["linkedin"], quote=True)}" style="color:{GREY};">LinkedIn</a>')
+    if brand.get("website"):
+        links.append(f'<a href="{escape(brand["website"], quote=True)}" style="color:{GREY};">Web</a>')
+    sep = ' <span style="color:#d0d7de;">&middot;</span> '
+    who = f'Escrito por {escape(brand["author"])}' if brand.get("author") else "Escrito de forma independiente"
+    line = who + ((sep + sep.join(links)) if links else "")
+    return (
+        f'<p style="margin:6px 0 0;font-size:11px;color:{GREY};">{line} '
+        f'&mdash; contenido personal, no es asesoramiento de ninguna entidad ni empleador.</p>'
+    )
+
+
+def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, analysis=None,
+                brand: Optional[dict] = None) -> str:
+    brand = {**DEFAULT_BRAND, **(brand or {})}
+    website_badge = ""
+    if brand.get("website"):
+        site_label = escape(brand["website"].replace("https://", "").replace("http://", "").rstrip("/"))
+        website_badge = (
+            f'<td style="text-align:right;vertical-align:top;"><a href="{escape(brand["website"], quote=True)}" '
+            f'style="font-size:12px;color:{GREY};text-decoration:none;border:1px solid #d0d7de;border-radius:12px;'
+            f'padding:4px 10px;white-space:nowrap;">{site_label}</a></td>'
+        )
     banner = ""
     if demo:
         banner = (
@@ -174,13 +210,16 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
 <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="max-width:640px;width:100%;background:#ffffff;border:1px solid #d0d7de;">
 <tr><td style="padding:24px;">
 {banner}
-<h1 style="font-size:20px;margin:0;">Resumen semanal de mercado</h1>
-<p style="margin:4px 0 0;font-size:13px;color:{GREY};">{escape(fmt_date_long(now))}</p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
+<td><h1 style="font-size:22px;margin:0;letter-spacing:-0.3px;">{escape(brand["title"])}</h1>
+<p style="margin:4px 0 0;font-size:13px;color:{GREY};">{escape(fmt_date_long(now))}</p></td>
+{website_badge}</tr></table>
 {analysis_html}
 {general}
-{watch}
 {news}
+{watch}
 <p style="margin:28px 0 0;padding-top:12px;border-top:1px solid #eaeef2;font-size:11px;color:{GREY};">{escape(DISCLAIMER)}</p>
+{_signature_html(brand)}
 </td></tr></table>
 </td></tr></table>
 </body></html>
@@ -188,11 +227,15 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
 
 
 # ---------- versión de texto ----------
-def render_text(data: dict, now: datetime, demo: bool = False, headlines=None, analysis=None) -> str:
+def render_text(data: dict, now: datetime, demo: bool = False, headlines=None, analysis=None,
+                brand: Optional[dict] = None) -> str:
+    brand = {**DEFAULT_BRAND, **(brand or {})}
     lines = []
     if demo:
         lines.append("*** DATOS DE EJEMPLO: cifras inventadas, no reales ***\n")
-    lines += ["RESUMEN SEMANAL DE MERCADO", fmt_date_long(now)]
+    lines += [brand["title"].upper(), fmt_date_long(now)]
+    if brand.get("website"):
+        lines.append(brand["website"])
     if analysis:
         lines += ["", "ANÁLISIS DE LA SEMANA", analysis, f"({AI_NOTE})"]
     lines += ["", "MERCADO GENERAL"]
@@ -211,4 +254,13 @@ def render_text(data: dict, now: datetime, demo: bool = False, headlines=None, a
         lines += ["", "TITULARES DE LA SEMANA"]
         lines += [f"- {h.title} ({h.source}, {h.published.strftime('%d/%m')}) {h.link}" for h in headlines]
     lines += ["", DISCLAIMER]
+    sig_bits = []
+    if brand.get("author"):
+        sig_bits.append("Escrito por " + brand["author"])
+    if brand.get("linkedin"):
+        sig_bits.append("LinkedIn: " + brand["linkedin"])
+    if brand.get("website"):
+        sig_bits.append("Web: " + brand["website"])
+    if sig_bits:
+        lines.append(" · ".join(sig_bits))
     return "\n".join(lines)

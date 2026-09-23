@@ -49,8 +49,8 @@ def main() -> None:
     analysis = None
     if args.ai:
         analysis = demo_summary() if args.demo else generate_summary(data, headlines, now, cfg.get("summary"))
-    html = render_html(data, now, demo=args.demo, headlines=headlines, analysis=analysis)
-    text = render_text(data, now, demo=args.demo, headlines=headlines, analysis=analysis)
+    html = render_html(data, now, demo=args.demo, headlines=headlines, analysis=analysis, brand=cfg.get("brand"))
+    text = render_text(data, now, demo=args.demo, headlines=headlines, analysis=analysis, brand=cfg.get("brand"))
     Path(args.out).write_text(html, encoding="utf-8")
     print(f"Vista previa guardada en {args.out}")
 
