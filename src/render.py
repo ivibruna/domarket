@@ -21,8 +21,7 @@ DEFAULT_BRAND = {
 GREEN, RED, GREY, BLUE = "#1a7f37", "#cf222e", "#57606a", "#1177eb"
 
 DISCLAIMER = (
-    "Datos de Yahoo Finance. "
-    "Correo automatizado."
+    ""
 )
 
 
@@ -143,7 +142,7 @@ def _section(title: str, body: str, accent: Optional[str] = None) -> str:
         link = escape(h.link, quote=True) if h.link.startswith(("http://", "https://")) else "#"
         items.append(
             f'<li style="margin:0 0 8px;font-size:13px;line-height:1.4;">'
-            f'<a href="{link}" style="color:#0969da;text-decoration:none;">{escape(h.title)}</a><br>'
+            f'<a href="{link}" style="color:#374151;text-decoration:none;">{escape(h.title)}</a><br>'
             f'<span style="font-size:11px;color:{GREY};">{escape(h.source)} · {h.published.strftime("%d/%m")}</span></li>'
         )
     return f'<ul style="margin:0;padding-left:18px;">{"".join(items)}</ul>'
@@ -262,19 +261,32 @@ def _signature_html(brand: dict) -> str:
             f'border:1px solid #d0d7de;">'
         )
     who = escape(brand["author"]) if brand.get("author") else "Escrito de forma independiente"
+    # Estilo base compartido por ambos botones
+    # Estilo base: fondo blanco, borde gris sutil, texto oscuro
+    _base_style = "text-decoration:none; display:inline-block; margin-left:8px; padding:4px 12px; border-radius:100px; font-size:12px; font-weight:600; background-color:#ffffff; border:1px solid #d1d5db;"   
     chips = "".join([
-        _chip("LinkedIn", brand["linkedin"]) if brand.get("linkedin") else "",
-        _chip("Web", brand["website"]) if brand.get("website") else "",
+        f'<a href="{brand["linkedin"]}" style="{_base_style} color:#0a66c2;">LinkedIn</a>' if brand.get("linkedin") else "",
+        f'<a href="{brand["website"]}" style="{_base_style} color:#374151;">Web</a>' if brand.get("website") else "",
+
     ])
     return (
-        f'<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:14px 0 0;"><tr>'
+       # 1. Despedida integrada en el texto (sobria y oscura)
+        # 1. Despedida más pequeña y en azul corporativo
+        f'<p style="margin:24px 0 12px; font-size:13px; font-weight:600; color:#374151;">¡Hasta la semana que viene!</p>'
+        
+        # 2. Tu firma (Avatar, nombre y botones a la derecha)
+        f'<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;"><tr>'
         f'{f"<td style=\"vertical-align:middle;width:36px;\">{avatar}</td>" if avatar else ""}'
-        f'<td style="padding-left:{"10px" if avatar else "0"};vertical-align:middle;font-size:12px;'
+        f'<td style="padding-left:{"10px" if avatar else "0"};vertical-align:middle;width:100%;font-size:13px;'
         f'color:#1f2328;font-weight:600;white-space:nowrap;">{who}</td>'
-        f'<td style="text-align:right;vertical-align:middle;">{chips}</td>'
+        f'<td style="text-align:right;vertical-align:middle;white-space:nowrap;">{chips}</td>'
         f'</tr></table>'
-        f'<p style="margin:12px 0 0;font-size:12px;color:{BLUE};">Hasta la semana que viene! '
-        f'</p>'
+        
+        # 3. Textos legales con su propia línea separadora integrada
+        f'<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #e5e7eb; margin-top:24px; padding-top:16px;"><tr>'
+        f'<td style="text-align:center; font-size:9px; color:#9ca3af; line-height:1.4;">'
+        f'Datos financieros proporcionados por Yahoo Finance.<br>Correo automatizado.'
+        f'</td></tr></table>'
     )
 
 
@@ -334,14 +346,14 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
     return f"""<!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Resumen semanal de mercado</title></head>
+<title>DOMarket Weekly Brief</title></head>
 <body style="margin:0;padding:24px 8px;background:#f6f8fa;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#1f2328;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center">
 <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="max-width:640px;width:100%;background:#ffffff;border:1px solid #d0d7de;">
 <tr><td style="padding:24px;">
 {banner}
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-bottom:1px solid #e5e7eb; padding-bottom:16px;"><tr>
-<td style="vertical-align:middle; padding-right:16px; min-width:0;">
+<td style="vertical-align:middle; padding-right:16px; width:100%;">
 <h1 style="font-size:22px; margin:0; font-weight:700; letter-spacing:0.3px; color:#151e2d; line-height:1.2;">{escape(brand["title"])}</h1>
 <p style="margin:4px 0 0; font-size:13px; color:{GREY};">{escape(fmt_date_long(now))}</p></td>
 {website_badge}</tr></table>

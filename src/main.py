@@ -26,7 +26,7 @@ def _all_failed(data: dict) -> bool:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Resumen semanal de mercado")
+    ap = argparse.ArgumentParser(description="DOMarket Weekly Brief")
     ap.add_argument("--demo", action="store_true", help="usar datos ficticios")
     ap.add_argument("--send", action="store_true", help="enviar por correo (por defecto, solo vista previa)")
     ap.add_argument("--ai", action="store_true", help="añadir el análisis redactado por el modelo de IA")
