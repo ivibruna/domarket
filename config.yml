@@ -3,9 +3,8 @@ general:
   # "unit" es solo una etiqueta para el correo (no convierte divisas): "pts" para índices,
   # "$" para materias primas en dólares, "€" para Bitcoin, "" para un tipo de cambio (ratio).
   - {symbol: "^IBEX",     name: "IBEX 35",       unit: "pts"}
-  #- {symbol: "0P0001CLDK", name: "MSCI World (Fidelity EUR)", unit: "€"}  # Fidelity MSCI World Index Fund EUR P Acc, ISIN IE00BYX5NX33  - {symbol: "^GSPC",     name: "S&P 500",       unit: "pts"}
-  - {symbol: "URTH",      name: "MSCI World (URTH)", unit: "$"}
-  - {symbol: "CL=F",      name: "Petróleo WTI",  unit: "$"}
+  - {symbol: "^GSPC",     name: "S&P 500",       unit: "pts"}
+  - {symbol: "0P0001CLDK.F", name: "MSCI World", unit: "€"}  # Fidelity MSCI World Index Fund EUR P Acc, ISIN IE00BYX5NX33
   - {symbol: "BZ=F",      name: "Petróleo Brent", unit: "$"}
   - {symbol: "GC=F",      name: "Oro",           unit: "$"}
   - {symbol: "BTC-EUR",   name: "Bitcoin (EUR)", unit: "€"}
@@ -38,7 +37,7 @@ news:
     - {name: "CNBC Finance",            url: "https://www.cnbc.com/id/10000664/device/rss/rss.html"}
     - {name: "CNBC Top News",           url: "https://www.cnbc.com/id/100003114/device/rss/rss.html", only_keywords: true}
     - {name: "MarketWatch",             url: "https://feeds.content.dowjones.io/public/rss/mw_topstories"}
-    - {name: "elEconomista Mercados",   url: "https://www.eleconomista.es/rss/rss-mercados.php", lang: "es"}  # sin verificar: valida con python -m src.news
+    - {name: "Expansión Mercados",      url: "https://e00-expansion.uecdn.es/rss/mercados.xml", lang: "es"}
     - {name: "BBC Business",            url: "https://feeds.bbci.co.uk/news/business/rss.xml"}
     - {name: "BBC World",               url: "https://feeds.bbci.co.uk/news/world/rss.xml", only_keywords: true}
     - {name: "BCE",                     url: "https://www.ecb.europa.eu/rss/press.xml", priority: true, only_keywords: true}

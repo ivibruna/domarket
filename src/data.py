@@ -55,8 +55,8 @@ def compute_metrics(closes: pd.Series) -> Metrics:
     )
 
 
-def fetch_quote(symbol: str, name: str) -> Quote:
-    """Descarga 1 año de cierres diarios. Un fallo no debe tumbar todo el correo."""
+"""def fetch_quote(symbol: str, name: str) -> Quote:
+    Descarga 1 año de cierres diarios. Un fallo no debe tumbar todo el correo.
     try:
         import yfinance as yf  # import diferido: los tests no lo necesitan
 
@@ -64,15 +64,37 @@ def fetch_quote(symbol: str, name: str) -> Quote:
         return Quote(symbol, name, metrics=compute_metrics(hist["Close"]))
     except Exception as exc:  # noqa: BLE001
         return Quote(symbol, name, error=f"{type(exc).__name__}: {exc}")
+"""
+
+def fetch_quote(symbol: str, name: str, unit: str = "") -> Quote:
+    """Descarga 1 año de cierres diarios. Un fallo no debe tumbar todo el correo."""
+    try:
+        import yfinance as yf  # import diferido: los tests no lo necesitan
+
+        hist = yf.Ticker(symbol).history(period="1y", interval="1d", auto_adjust=True)
+        # Añadimos unit=unit aquí al instanciar Quote
+        return Quote(symbol, name, unit=unit, metrics=compute_metrics(hist["Close"]))
+    except Exception as exc:  # noqa: BLE001
+        # Añadimos unit=unit también en caso de error
+        return Quote(symbol, name, unit=unit, error=f"{type(exc).__name__}: {exc}")
+
+
+def fetch_all(cfg: dict) -> dict:
+    return {
+        # Usamos a.get("unit", "") para extraer la divisa del YAML y pasarla a fetch_quote
+        section: [fetch_quote(a["symbol"], a["name"], a.get("unit", "")) for a in cfg.get(section, [])]
+        for section in ("general", "watchlist")
+    }
 
 
 def load_config(path: str = "config.yml") -> dict:
     with open(path, encoding="utf-8") as fh:
         return yaml.safe_load(fh)
 
-
+"""
 def fetch_all(cfg: dict) -> dict:
     return {
         section: [fetch_quote(a["symbol"], a["name"]) for a in cfg.get(section, [])]
         for section in ("general", "watchlist")
     }
+"""
