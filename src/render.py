@@ -124,11 +124,13 @@ ACCENTS = {
     "gray":  ("#D7DAE2", "#D7DAE2"),
 }
 
-
 def _section(title: str, body: str, accent: Optional[str] = None) -> str:
-    heading = f'<h2 style="font-size:16px;margin:0 0 10px;color:#1f2328;">{escape(title)}</h2>'
+    # Nuevo estilo: mayúsculas, más pequeño, espaciado y gris oscuro
+    heading = f'<h2 style="margin:0 0 16px; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#374151;">{escape(title)}</h2>'
+    
     if accent is None:
         return f'<div style="margin:28px 0 0;">{heading}{body}</div>'
+    
     border, bg = ACCENTS[accent]
     return (
         f'<div style="margin:28px 0 0;background:{bg};border-left:4px solid {border};'
@@ -157,7 +159,7 @@ def _headlines_html(headlines) -> str:
     
     # Diseño de la noticia principal (sin viñeta, letra más grande y oscura)
     html = (
-        f'<div style="margin-bottom:18px; padding-bottom:18px; border-bottom:1px solid #e5e7eb;">'
+        f'<div style="margin-bottom:16px;">'
         f'<span style="font-size:11px; font-weight:700; color:#0969da; text-transform:uppercase; letter-spacing:0.5px;">Noticia Destacada</span><br>'
         f'<a href="{hero_link}" style="display:inline-block; margin-top:6px; font-size:18px; font-weight:700; color:#111827; text-decoration:none; line-height:1.3;">{escape(hero.title)}</a><br>'
         f'<span style="font-size:12px; color:{GREY}; display:inline-block; margin-top:6px;">{escape(hero.source)} · {hero.published.strftime("%d/%m")}</span>'
@@ -192,7 +194,7 @@ AI_NOTE = ("Texto generado automáticamente por un modelo de IA")
         else:
             para_html = escape(para)
         paragraphs.append(f'<p style="margin:0 0 14px;font-size:14px;line-height:1.6;text-align:justify;">{para_html}</p>')
-    note = f'<p style="margin:0;font-size:11px;color:{GREY};font-style:italic;">{escape(AI_NOTE)}</p>'
+    note = f'<p style="margin:0;font-size:9px;color:#9ca3af;">{escape(AI_NOTE)}</p>'
     return "".join(paragraphs) + note
 """
 def _analysis_html(text: str) -> str:
@@ -326,13 +328,22 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
             'font-size:13px;color:#1f2328;"><strong>DATOS DE EJEMPLO</strong> — cifras inventadas '
             "solo para ver el diseño. No son reales.</div>"
         )
+        
+    # --- NUEVA LÓGICA DE SEPARADORES ---
+    divider = '<hr style="border:0; border-top:1px solid #e5e7eb; margin:36px 0 8px;">'
+
     general = _section(
         "Mercado general",
         _table(["Activo", "Último", "1 sem.", "1 mes"], _general_rows(data.get("general", []))),
         accent="amber",
     )
-    analysis_html = _section("Análisis de la semana", _analysis_html(analysis)) if analysis else ""
-    news = _section("Titulares de la semana", _headlines_html(headlines)) if headlines else ""
+    
+    # Se añade el separador al final del análisis (si hay análisis)
+    analysis_html = (_section("Análisis de la semana", _analysis_html(analysis)) + divider) if analysis else ""
+    
+    # Se añade el separador al principio de las noticias (si hay noticias)
+    news = (divider + _section("Titulares de la semana", _headlines_html(headlines))) if headlines else ""
+    
     watch = ""
     if data.get("watchlist"):
         watch = _section(
@@ -343,6 +354,8 @@ def render_html(data: dict, now: datetime, demo: bool = False, headlines=None, a
             ),
             accent="blue",
         )
+    # -----------------------------------
+
     return f"""<!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
