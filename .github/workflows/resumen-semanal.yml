@@ -2,7 +2,7 @@ name: resumen-semanal
 
 on:
   schedule:
-    - cron: "0 6 * * 1"   # lunes 06:00 UTC (07:00 en invierno, 08:00 en verano, hora de Madrid)
+    - cron: "17 5 * * 1"   # lunes 05:17 UTC (07:17 en Madrid en verano, 06:17 en invierno)
   workflow_dispatch:       # botón "Run workflow" para lanzarlo a mano
     inputs:
       demo:
@@ -38,7 +38,18 @@ jobs:
       - name: Instalar llama.cpp
         run: |
           mkdir -p llama && cd llama
-          gh release download "$LLAMACPP_TAG" --repo ggml-org/llama.cpp --pattern '*ubuntu-x64.tar.gz'
+          # Camino rápido: la versión fijada. Si ya no existe o no tiene el binario de Ubuntu,
+          # se cae a la última versión disponible que sí lo tenga, para no depender de un
+          # número de versión concreto que algún día dejará de existir.
+          if ! gh release download "$LLAMACPP_TAG" --repo ggml-org/llama.cpp --pattern '*ubuntu-x64.tar.gz' 2>/tmp/dl.log; then
+            echo "Aviso: $LLAMACPP_TAG no disponible, busco la última versión con binario de Ubuntu"
+            cat /tmp/dl.log
+            TAG=$(gh api "repos/ggml-org/llama.cpp/releases?per_page=30" --jq \
+              '[.[] | select(any(.assets[]; .name | test("^llama-.*-bin-ubuntu-x64\\.(tar\\.gz|zip)$")))][0].tag_name')
+            test -n "$TAG"
+            echo "Uso $TAG en su lugar"
+            gh release download "$TAG" --repo ggml-org/llama.cpp --pattern '*ubuntu-x64.tar.gz'
+          fi
           tar xzf *.tar.gz
           SERVER=$(find "$PWD" -name llama-server -type f | head -1)
           test -n "$SERVER"
@@ -76,3 +87,11 @@ jobs:
       - name: Registro de llama-server (si algo falla)
         if: failure()
         run: tail -n 60 llama.log || true
+
+      - name: Avisar por correo si algo ha fallado
+        if: failure()
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: python -m src.notify || true

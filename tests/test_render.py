@@ -23,7 +23,7 @@ class RenderTest(unittest.TestCase):
     def test_demo_html_contains_sections_and_banner(self):
         html = render_html(demo_data(), NOW, demo=True)
         for expected in ("Mercado general", "Mi cartera", "IBEX 35",
-                         "Nueva Expresión Textil", "DATOS DE EJEMPLO", "lunes 28 de septiembre de 2026"):
+                         "Nueva Expresión Textil", "DATOS DE EJEMPLO", "lunes 28 de Septiembre de 2026"):
             self.assertIn(expected, html)
 
     def test_real_html_has_no_demo_banner(self):

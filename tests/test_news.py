@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 
-from src.news import Headline, collect_headlines, parse_feed
+from src.news import Headline, collect_headlines, parse_feed, select_for_email
 
 NOW = datetime(2026, 9, 28, 8, 0, tzinfo=timezone.utc)
 
@@ -77,3 +77,27 @@ class CollectTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SelectForEmailTest(unittest.TestCase):
+    def h(self, source, score, lang="en", when=NOW):
+        return Headline(source, f"titular de {source}", "https://x.com", when, score=score, lang=lang)
+
+    def test_spanish_headline_goes_first_then_top_others(self):
+        pool = [self.h("A", 5), self.h("El Economista", 1, lang="es"), self.h("B", 9), self.h("C", 3)]
+        picked = select_for_email(pool, total=4)
+        self.assertEqual(picked[0].source, "El Economista")
+        self.assertEqual([h.source for h in picked[1:]], ["B", "A", "C"])
+
+    def test_no_spanish_headline_falls_back_to_top_n(self):
+        pool = [self.h("A", 1), self.h("B", 9), self.h("C", 5)]
+        picked = select_for_email(pool, total=2)
+        self.assertEqual([h.source for h in picked], ["B", "C"])
+
+    def test_respects_total_even_with_spanish(self):
+        pool = [self.h("ES", 1, lang="es"), self.h("A", 9), self.h("B", 5), self.h("C", 3)]
+        picked = select_for_email(pool, total=2)
+        self.assertEqual([h.source for h in picked], ["ES", "A"])
+
+    def test_empty_pool(self):
+        self.assertEqual(select_for_email([], total=4), [])
