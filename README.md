@@ -1,12 +1,10 @@
 # DOMarket Weekly Brief
 
-Un correo semanal, automático y gratuito, con un resumen del mercado y el
+Un correo semanal, automátizado y gratuito, con un resumen del mercado y el
 seguimiento de una cartera personal. Se genera y se envía solo, cada lunes,
 con [GitHub Actions](https://github.com/features/actions).
 
 ![Vista previa del correo](assets/preview.png)
-
-*(captura con datos de ejemplo — las cifras no son reales)*
 
 ## Qué hace
 
@@ -134,22 +132,6 @@ Casi todo se cambia en `config.yml`, sin tocar código:
   prompt en sí vive en `src/summary.py` (`SYSTEM_PROMPT`).
 - **`brand`**: título, web, autor, LinkedIn y avatar del correo.
 
-## Limitaciones conocidas
-
-- **El feed del BCE falla con `CERTIFICATE_VERIFY_FAILED` en Windows en
-  local.** Es un problema del almacén de certificados de Windows, no del
-  código; en GitHub Actions (Linux) funciona sin problema.
-- **La versión de `llama.cpp` del workflow** está fijada a una concreta para
-  que las ejecuciones sean reproducibles; si GitHub la retira, el workflow
-  cae automáticamente a la última versión disponible.
-- **Gemma es un modelo pequeño** (12B, cuantizado) para caber en un runner
-  gratuito. El prompt le pide explícitamente no inventar cifras ni dar
-  recomendaciones, pero como cualquier LLM puede simplificar de más algún
-  titular — conviene darle un vistazo rápido antes de darlo por bueno.
-- **Las cotizaciones de fondos de inversión** (a diferencia de acciones e
-  índices) tienen cobertura irregular en Yahoo Finance; si un fondo no
-  aparece, prueba con el identificador Morningstar (`0Pxxxxxxxx`) en vez del
-  ISIN.
 
 ## Créditos y licencias
 
